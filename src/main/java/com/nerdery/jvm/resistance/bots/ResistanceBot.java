@@ -8,11 +8,7 @@ import java.util.Optional;
 /**
  * @author Josh Klun (jklun@nerdery.com)
  */
-public class ResistanceBot implements DoctorBot {
-    @Override
-    public String getUserId() {
-        return "test";
-    }
+public class ResistanceBot extends TestBot {
 
     @Override
     public boolean prescribeAntibiotic(float patientTemperature, Optional<Collection<Prescription>> previousPrescriptions) {

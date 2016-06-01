@@ -1,5 +1,7 @@
 package com.nerdery.jvm.resistance.models;
 
+import java.util.Objects;
+
 /**
  * A simple description of the prescription for a patient in the previous round.
  *
@@ -27,5 +29,20 @@ public class Prescription {
 
     public float getTemperature() {
         return temperature;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Prescription that = (Prescription) o;
+        return prescribedAntibiotics == that.prescribedAntibiotics &&
+                Float.compare(that.temperature, temperature) == 0 &&
+                Objects.equals(userId, that.userId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(userId, prescribedAntibiotics, temperature);
     }
 }
