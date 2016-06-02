@@ -1,5 +1,7 @@
 package com.nerdery.jvm.resistance.tournament;
 
+import java.security.SecureRandom;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -7,12 +9,17 @@ import java.util.Objects;
  * @author Josh Klun (jklun@nerdery.com)
  */
 public class TownGeneration {
+    public static final int DOCTORS_PER_TOWN = 4;
     private List<Entrant> generationEntrants;
     private List<TownDay> days;
 
     public TownGeneration(List<Entrant> generationEntrants, List<TownDay> days) {
         this.generationEntrants = generationEntrants;
         this.days = days;
+    }
+
+    public static TownGenerationBuilder builder() {
+        return new TownGenerationBuilder();
     }
 
     @Override
@@ -27,5 +34,47 @@ public class TownGeneration {
     @Override
     public int hashCode() {
         return Objects.hash(generationEntrants, days);
+    }
+
+    public static class TownGenerationBuilder {
+
+        private List<Entrant> entrants;
+        private int maximumPatients;
+        private int minimumPatients;
+
+        private TownGenerationBuilder() {
+            entrants = Collections.emptyList();
+            minimumPatients = DOCTORS_PER_TOWN;
+            maximumPatients = DOCTORS_PER_TOWN;
+        }
+
+        public TownGenerationBuilder entrants(List<Entrant> entrants) {
+            this.entrants = entrants;
+            return this;
+        }
+
+        public TownGenerationBuilder maximumPatients(int maximumPatients) {
+            this.maximumPatients = maximumPatients;
+            return this;
+        }
+
+        public TownGenerationBuilder minimumPatients(int minimumPatients) {
+            this.minimumPatients = minimumPatients;
+            return this;
+        }
+
+        public TownGeneration build() {
+            List<TownDay> days = buildDays(entrants, minimumPatients, maximumPatients);
+            return new TownGeneration(entrants, days);
+        }
+
+        private List<TownDay> buildDays(List<Entrant> entrants, int minimumPatients, int maximumPatients) {
+            int patientSpread = maximumPatients - minimumPatients;
+            SecureRandom random = new SecureRandom();
+            int patientCount = minimumPatients + (random.nextInt() % patientSpread);
+            patientCount = patientCount + (patientCount % DOCTORS_PER_TOWN);
+            // TODO: This isn't even close to done.
+            return null;
+        }
     }
 }
