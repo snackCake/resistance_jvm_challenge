@@ -4,9 +4,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 repositories {
-    maven {
-        url "http://reno.nerderylabs.com:8181/nexus-2.7.1/content/groups/public"
-    }
+    mavenCentral()
     jcenter()
 }
 
