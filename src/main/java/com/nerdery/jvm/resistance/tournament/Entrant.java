@@ -27,7 +27,7 @@ public class Entrant {
     }
 
     public int getExtinctionsCaused() {
-        return (int) results.stream().filter(EntrantGenerationResult::isTriggeredExctinction).count();
+        return (int) results.stream().filter(EntrantGenerationResult::isTriggeredExtinction).count();
     }
 
     public void addGenerationResult(EntrantGenerationResult result) {
