@@ -12,8 +12,9 @@ import java.util.Collection;
  * Pros: Punishes malpractice with a vengeance
  * Cons: Ironically, a really terrible doctor.
  *
- * Part 1: https://youtu.be/N2jqoUABDGI?t=5m23s
- * Part 2: https://www.youtube.com/watch?v=5keNxXQxQ5w
+ * Inspiration:
+ * - Part 1: https://youtu.be/N2jqoUABDGI?t=5m23s
+ * - Part 2: https://www.youtube.com/watch?v=5keNxXQxQ5w
  *
  * @author Stephen Hopper
  */
