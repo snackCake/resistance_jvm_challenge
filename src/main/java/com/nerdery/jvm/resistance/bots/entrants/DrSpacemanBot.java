@@ -27,9 +27,9 @@ public class DrSpacemanBot implements DoctorBot {
     }
 
     @Override
-    public boolean prescribeAntibiotic(float patientTemperature, Optional<Collection<Prescription>> previousPrescriptions) {
+    public boolean prescribeAntibiotic(float patientTemperature, Collection<Prescription> previousPrescriptions) {
         if (otherDoctors.isEmpty()) {
-            for (Prescription prescription : previousPrescriptions.get()) {
+            for (Prescription prescription : previousPrescriptions) {
                 String userId = prescription.getUserId();
 
                 if (USER_ID.equals(userId)) {
@@ -41,7 +41,7 @@ public class DrSpacemanBot implements DoctorBot {
             }
         }
 
-        for (Prescription prescription : previousPrescriptions.get()) {
+        for (Prescription prescription : previousPrescriptions) {
             if (USER_ID.equals(prescription.getUserId())) {
                 continue;
             }
