@@ -1,5 +1,6 @@
 package com.nerdery.jvm.resistance.test
 
+import com.nerdery.jvm.resistance.TournamentRunner
 import com.nerdery.jvm.resistance.models.tournament.Entrant
 import com.nerdery.jvm.resistance.models.tournament.EntrantGenerationResult
 import spock.lang.Specification
@@ -10,25 +11,25 @@ import spock.lang.Specification
  * @author Josh Klun (jklun@nerdery.com)
  */
 class EntrantSpec extends Specification {
-    def "Doctor Spaceman is real"() {
+    def "Doctor Nick says Hi Everybody!"() {
         given:
         def finder = Entrant.finder()
-        def searchPackage = "com.nerdery.jvm.resistance.bots.entrants"
+        def searchPackage = TournamentRunner.DEFAULT_ENTRANT_PACKAGE
 
         when: "entrants searched in #searchPackage"
         def entrants = finder.searchPackage(searchPackage).find()
 
-        then: "Doctor Spaceman should be in the list"
+        then: "Doctor Nick should be in the list"
         println(entrants)
         entrants.find { entrant ->
-            entrant.doctorBot.class.name == "com.nerdery.jvm.resistance.bots.entrants.jklun.DoctorSpacemanBot"
+            entrant.doctorBot.class.name == TournamentRunner.DEFAULT_ENTRANT_PACKAGE + ".jklun.DoctorNickBot"
         } != null
     }
 
     def "Test Bot isn't found since it is abstract"() {
         given:
         def finder = Entrant.finder()
-        def searchPackage = "com.nerdery.jvm.resistance.bots.test"
+        def searchPackage = TournamentRunner.TEST_ENTRANT_PACKAGE
 
         when: "entrants searched in #searchPackage"
         def entrants = finder.searchPackage(searchPackage).find()
@@ -36,14 +37,14 @@ class EntrantSpec extends Specification {
         then: "Test Bot should not be in the list"
         println(entrants)
         entrants.find { entrant ->
-            entrant.doctorBot.class.name == "com.nerdery.jvm.resistance.bots.test.TestBot"
+            entrant.doctorBot.class.name == TournamentRunner.TEST_ENTRANT_PACKAGE + ".TestBot"
         } == null
     }
 
     def "Resistance Bot should always prescribe antibiotics"() {
         given:
         def finder = Entrant.finder()
-        def searchPackage = "com.nerdery.jvm.resistance.bots.test"
+        def searchPackage = TournamentRunner.TEST_ENTRANT_PACKAGE
 
         when: "entrants searched in #searchPackage"
         def entrants = finder.searchPackage(searchPackage).find()
@@ -51,14 +52,14 @@ class EntrantSpec extends Specification {
         then: "Resistance bot should return true (prescribe antibiotics)"
         println(entrants)
         entrants.find { entrant ->
-            entrant.doctorBot.class.name == "com.nerdery.jvm.resistance.bots.test.ResistanceBot"
+            entrant.doctorBot.class.name == TournamentRunner.TEST_ENTRANT_PACKAGE + ".ResistanceBot"
         }.doctorBot.prescribeAntibiotic(2.0f, Collections.emptyList())
     }
 
     def "Malpractice Bot should never prescribe antibiotics"() {
         given:
         def finder = Entrant.finder()
-        def searchPackage = "com.nerdery.jvm.resistance.bots.test"
+        def searchPackage = TournamentRunner.TEST_ENTRANT_PACKAGE
 
         when: "entrants searched in #searchPackage"
         def entrants = finder.searchPackage(searchPackage).find()
@@ -66,20 +67,20 @@ class EntrantSpec extends Specification {
         then: "Malpractice bot should return false (prescribe rest)"
         println(entrants)
         !entrants.find { entrant ->
-            entrant.doctorBot.class.name == "com.nerdery.jvm.resistance.bots.test.MalpracticeBot"
+            entrant.doctorBot.class.name == TournamentRunner.TEST_ENTRANT_PACKAGE + ".MalpracticeBot"
         }.doctorBot.prescribeAntibiotic(200.0f, Collections.emptyList())
     }
 
     def "An entrant should compute its score properly"() {
         given:
         def finder = Entrant.finder()
-        def searchPackage = "com.nerdery.jvm.resistance.bots.test"
+        def searchPackage = TournamentRunner.TEST_ENTRANT_PACKAGE
 
         when: "using MalpracticeBot, but it shouldn't matter"
         def entrant = finder.searchPackage(searchPackage)
                 .find()
                 .find { entrant ->
-                    entrant.doctorBot.class.name == "com.nerdery.jvm.resistance.bots.test.MalpracticeBot"
+                    entrant.doctorBot.class.name == TournamentRunner.TEST_ENTRANT_PACKAGE + ".MalpracticeBot"
                 }
         // Note: generation numbers aren't consistent
         entrant.addGenerationResult(new EntrantGenerationResult(5, 5, 5, 5, 5, 5, false))
@@ -98,13 +99,13 @@ class EntrantSpec extends Specification {
     def "An entrant should know how many extinctions it caused"() {
         given:
         def finder = Entrant.finder()
-        def searchPackage = "com.nerdery.jvm.resistance.bots.test"
+        def searchPackage = TournamentRunner.TEST_ENTRANT_PACKAGE
 
         when: "using MalpracticeBot, but it shouldn't matter"
         def entrant = finder.searchPackage(searchPackage)
                 .find()
                 .find { entrant ->
-                    entrant.doctorBot.class.name == "com.nerdery.jvm.resistance.bots.test.ResistanceBot"
+                    entrant.doctorBot.class.name == TournamentRunner.TEST_ENTRANT_PACKAGE + ".ResistanceBot"
                 }
         // Note: generation numbers aren't consistent
         entrant.addGenerationResult(new EntrantGenerationResult(5, 5, 5, 5, 5, 5, false))

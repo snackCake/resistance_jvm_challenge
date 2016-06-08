@@ -10,7 +10,7 @@ import java.util.Collection;
  *
  * @author Josh Klun (jklun@nerdery.com)
  */
-public class DoctorSpacemanBot implements DoctorBot {
+public class DoctorNickBot implements DoctorBot {
     @Override
     public String getUserId() {
         return "jklun";

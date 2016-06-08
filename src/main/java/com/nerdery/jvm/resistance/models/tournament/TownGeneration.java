@@ -11,12 +11,14 @@ import java.util.stream.IntStream;
  * @author Josh Klun (jklun@nerdery.com)
  */
 public class TownGeneration {
+
     public static final int DOCTORS_PER_TOWN = 4;
-    private List<Entrant> generationEntrants;
+
+    private List<Entrant> entrants;
     private List<TownDay> days;
 
-    private TownGeneration(List<Entrant> generationEntrants, List<TownDay> days) {
-        this.generationEntrants = generationEntrants;
+    private TownGeneration(List<Entrant> entrants, List<TownDay> days) {
+        this.entrants = entrants;
         this.days = days;
     }
 
@@ -24,24 +26,32 @@ public class TownGeneration {
         return new TownGenerationBuilder();
     }
 
+    public List<TownDay> getDays() {
+        return days;
+    }
+
+    public List<Entrant> getEntrants() {
+        return entrants;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TownGeneration that = (TownGeneration) o;
-        return Objects.equals(generationEntrants, that.generationEntrants) &&
+        return Objects.equals(entrants, that.entrants) &&
                 Objects.equals(days, that.days);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(generationEntrants, days);
+        return Objects.hash(entrants, days);
     }
 
     @Override
     public String toString() {
         return "TownGeneration{" +
-                "generationEntrants=" + generationEntrants +
+                "entrants=" + entrants +
                 ", days=" + days +
                 '}';
     }
@@ -85,7 +95,7 @@ public class TownGeneration {
             patientCount = patientCount + (patientCount % entrants.size());
             TownDay.TownDayBuilder townDayBuilder = TownDay.builder();
             townDayBuilder.entrants(entrants);
-            return IntStream.of(patientCount)
+            return IntStream.range(0, patientCount)
                     .mapToObj(i -> townDayBuilder.dayNumber(i).build())
                     .collect(Collectors.toList());
         }
