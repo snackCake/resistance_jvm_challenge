@@ -10,7 +10,7 @@ import java.util.*;
  */
 public class DrSpacemanBot implements DoctorBot {
 
-    private static final String USER_ID = "zrbrown";
+    private static final String USER_ID = "zbrown";
 
     private static final float NO_INFECTION_CHANCE_TEMP_CEILING = 100;
     private static final float LOW_INFECTION_CHANCE_TEMP_CEILING = 101;
