@@ -35,10 +35,10 @@ class DocCottleBot extends DoctorBot {
     } else if(looksViral(temperature)) {
       if(profiles.values.exists(_.isCautious)) {
         // "Freaking hypochondriac. One on every bloody ship."
-        PrescribeAntibiotics
+        PrescribeRest
       } else {
         // Is he gonna make it? "How should I know? I'm not a psychic."
-        PrescribeRest
+        PrescribeAntibiotics
       }
     } else {
       // "Jaw set nicely. You're done here."
