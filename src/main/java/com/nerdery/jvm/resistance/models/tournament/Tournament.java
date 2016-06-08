@@ -13,8 +13,8 @@ import java.util.stream.Collectors;
  * @author Josh Klun (jklun@nerdery.com)
  */
 public class Tournament {
-    public static final int MAXIMUM_PATIENTS = 200;
-    public static final int MINIMUM_PATIENTS = 100;
+    public static final int MAXIMUM_DAYS = 200;
+    public static final int MINIMUM_DAYS = 100;
     private List<Entrant> entrants;
     private List<TownGeneration> generations;
 
@@ -90,8 +90,8 @@ public class Tournament {
                                     .map(entrants::get).collect(Collectors.toList()))
                     .map(generationEntrants ->
                             TownGeneration.builder()
-                                    .minimumPatients(MINIMUM_PATIENTS)
-                                    .maximumPatients(MAXIMUM_PATIENTS)
+                                    .minimumDays(MINIMUM_DAYS)
+                                    .maximumDays(MAXIMUM_DAYS)
                                     .entrants(generationEntrants)
                                     .build())
                     .collect(Collectors.toList());

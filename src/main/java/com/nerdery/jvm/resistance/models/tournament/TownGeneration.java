@@ -59,13 +59,13 @@ public class TownGeneration {
     public static class TownGenerationBuilder {
 
         private List<Entrant> entrants;
-        private int maximumPatients;
-        private int minimumPatients;
+        private int maximumDays;
+        private int minimumDays;
 
         private TownGenerationBuilder() {
             entrants = Collections.emptyList();
-            minimumPatients = DOCTORS_PER_TOWN;
-            maximumPatients = DOCTORS_PER_TOWN;
+            minimumDays = 1;
+            maximumDays = 1;
         }
 
         public TownGenerationBuilder entrants(List<Entrant> entrants) {
@@ -73,26 +73,25 @@ public class TownGeneration {
             return this;
         }
 
-        public TownGenerationBuilder maximumPatients(int maximumPatients) {
-            this.maximumPatients = maximumPatients;
+        public TownGenerationBuilder maximumDays(int maximumPatients) {
+            this.maximumDays = maximumPatients;
             return this;
         }
 
-        public TownGenerationBuilder minimumPatients(int minimumPatients) {
-            this.minimumPatients = minimumPatients;
+        public TownGenerationBuilder minimumDays(int minimumPatients) {
+            this.minimumDays = minimumPatients;
             return this;
         }
 
         public TownGeneration build() {
-            List<TownDay> days = buildDays(entrants, minimumPatients, maximumPatients);
+            List<TownDay> days = buildDays(entrants, minimumDays, maximumDays);
             return new TownGeneration(entrants, days);
         }
 
         private List<TownDay> buildDays(List<Entrant> entrants, int minimumPatients, int maximumPatients) {
-            int patientSpread = maximumPatients - minimumPatients;
+            int daySpread = maximumPatients - minimumPatients;
             SecureRandom random = new SecureRandom();
-            int patientCount = minimumPatients + (random.nextInt() % patientSpread);
-            patientCount = patientCount + (patientCount % entrants.size());
+            int patientCount = minimumPatients + (Math.abs(random.nextInt()) % daySpread);
             TownDay.TownDayBuilder townDayBuilder = TownDay.builder();
             townDayBuilder.entrants(entrants);
             return IntStream.range(0, patientCount)
