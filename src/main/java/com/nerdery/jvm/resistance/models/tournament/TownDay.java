@@ -1,4 +1,4 @@
-package com.nerdery.jvm.resistance.tournament;
+package com.nerdery.jvm.resistance.models.tournament;
 
 import com.nerdery.jvm.resistance.models.Patient;
 
@@ -52,6 +52,15 @@ public class TownDay {
     @Override
     public int hashCode() {
         return Objects.hash(dayNumber, doctors, patients);
+    }
+
+    @Override
+    public String toString() {
+        return "TownDay{" +
+                "dayNumber=" + dayNumber +
+                ", doctors=" + doctors +
+                ", patients=" + patients +
+                '}';
     }
 
     public static class TownDayBuilder {

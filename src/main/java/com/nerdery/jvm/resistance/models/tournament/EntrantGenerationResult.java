@@ -1,4 +1,4 @@
-package com.nerdery.jvm.resistance.tournament;
+package com.nerdery.jvm.resistance.models.tournament;
 
 import java.util.Objects;
 
@@ -76,5 +76,18 @@ public class EntrantGenerationResult {
     public int hashCode() {
         return Objects.hash(score, malpracticeSuits, viralCures, bacterialCures,
                 antibioticsPrescribed, patientsTreated, triggeredExtinction);
+    }
+
+    @Override
+    public String toString() {
+        return "EntrantGenerationResult{" +
+                "score=" + score +
+                ", malpracticeSuits=" + malpracticeSuits +
+                ", viralCures=" + viralCures +
+                ", bacterialCures=" + bacterialCures +
+                ", antibioticsPrescribed=" + antibioticsPrescribed +
+                ", patientsTreated=" + patientsTreated +
+                ", triggeredExtinction=" + triggeredExtinction +
+                '}';
     }
 }

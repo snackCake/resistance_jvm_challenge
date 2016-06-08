@@ -1,14 +1,11 @@
-package com.nerdery.jvm.resistance.tournament;
+package com.nerdery.jvm.resistance.models.tournament;
 
 import com.google.common.collect.Lists;
-import com.nerdery.jvm.resistance.bots.DoctorBot;
 import org.apache.commons.math3.util.Combinations;
-import org.reflections.Reflections;
 
-import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -25,6 +22,31 @@ public class Tournament {
         this.entrants = entrants;
         this.generations = generations;
         this.currentGenerationIndex = 0;
+    }
+
+
+    @Override
+    public boolean equals(Object atheO) {
+        if (this == atheO) return true;
+        if (atheO == null || getClass() != atheO.getClass()) return false;
+        Tournament athat = (Tournament) atheO;
+        return currentGenerationIndex == athat.currentGenerationIndex &&
+                Objects.equals(entrants, athat.entrants) &&
+                Objects.equals(generations, athat.generations);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(entrants, generations, currentGenerationIndex);
+    }
+
+    @Override
+    public String toString() {
+        return "Tournament{" +
+                "entrants=" + entrants +
+                ", generations=" + generations +
+                ", currentGenerationIndex=" + currentGenerationIndex +
+                '}';
     }
 
     public static TournamentBuilder builder() {
@@ -56,7 +78,7 @@ public class Tournament {
         }
 
         public Tournament build() {
-            List<Entrant> entrants = findEntrants(entrantPackage);
+            List<Entrant> entrants = Entrant.finder().searchPackage(entrantPackage).find();
             List<TownGeneration> generations = buildGenerations(entrants);
             return new Tournament(entrants, generations);
         }
@@ -75,24 +97,6 @@ public class Tournament {
                                     .maximumPatients(MAXIMUM_PATIENTS)
                                     .entrants(generationEntrants)
                                     .build())
-                    .collect(Collectors.toList());
-        }
-
-        private List<Entrant> findEntrants(String entrantPackage) {
-            Reflections entrantFinder = new Reflections(entrantPackage);
-            Set<Class<? extends DoctorBot>> subTypes = entrantFinder.getSubTypesOf(DoctorBot.class);
-            return subTypes.stream()
-                    .filter(clazz -> !clazz.isInterface() && Modifier.isAbstract(clazz.getModifiers()))
-                    .map(clazz -> {
-                        DoctorBot doctorBot = null;
-                        try {
-                            doctorBot = clazz.newInstance();
-                        } catch (InstantiationException | IllegalAccessException e) {
-                            e.printStackTrace(); // TODO: Logging Support
-                        }
-                        return doctorBot;
-                    })
-                    .map(Entrant::new)
                     .collect(Collectors.toList());
         }
     }

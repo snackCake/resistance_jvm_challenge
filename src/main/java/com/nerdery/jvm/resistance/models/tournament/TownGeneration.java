@@ -1,4 +1,4 @@
-package com.nerdery.jvm.resistance.tournament;
+package com.nerdery.jvm.resistance.models.tournament;
 
 import java.security.SecureRandom;
 import java.util.Collections;
@@ -36,6 +36,14 @@ public class TownGeneration {
     @Override
     public int hashCode() {
         return Objects.hash(generationEntrants, days);
+    }
+
+    @Override
+    public String toString() {
+        return "TownGeneration{" +
+                "generationEntrants=" + generationEntrants +
+                ", days=" + days +
+                '}';
     }
 
     public static class TownGenerationBuilder {

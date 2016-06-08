@@ -9,16 +9,20 @@ import java.util.Random;
  */
 public class Patient {
 
-    private float patientTemperature;
+    private float temperature;
     private boolean bacterialInfection;
 
-    public Patient(float patientTemperature, boolean bacterialInfection) {
-        this.patientTemperature = patientTemperature;
+    public Patient(float temperature, boolean bacterialInfection) {
+        this.temperature = temperature;
         this.bacterialInfection = bacterialInfection;
     }
 
-    public float getPatientTemperature() {
-        return patientTemperature;
+    public static PatientBuilder builder() {
+        return new PatientBuilder();
+    }
+
+    public float getTemperature() {
+        return temperature;
     }
 
     public boolean isBacterialInfection() {
@@ -30,17 +34,20 @@ public class Patient {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Patient patient = (Patient) o;
-        return Float.compare(patient.patientTemperature, patientTemperature) == 0 &&
-                bacterialInfection == patient.bacterialInfection;
+        return Float.compare(patient.temperature, temperature) == 0 && bacterialInfection == patient.bacterialInfection;
     }
 
-    public static PatientBuilder builder() {
-        return new PatientBuilder();
+    @Override
+    public String toString() {
+        return "Patient{" +
+                "temperature=" + temperature +
+                ", bacterialInfection=" + bacterialInfection +
+                '}';
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(patientTemperature, bacterialInfection);
+        return Objects.hash(temperature, bacterialInfection);
     }
 
     public static class PatientBuilder {

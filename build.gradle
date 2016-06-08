@@ -1,4 +1,5 @@
 apply plugin: 'java'
+apply plugin: 'groovy'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -14,5 +15,9 @@ dependencies {
     compile 'org.apache.commons:commons-math3:3.6.1'
     compile 'org.twitter4j:twitter4j-core:4.0.4'
     compile 'org.twitter4j:twitter4j-async:4.0.4'
+    compile "org.codehaus.groovy:groovy-all:2.4.1"
     testCompile 'junit:junit:4.11'
+    testCompile "org.spockframework:spock-core:1.0-groovy-2.4"
+    testRuntime "cglib:cglib-nodep:3.1"
+    testRuntime "org.objenesis:objenesis:2.1"
 }
