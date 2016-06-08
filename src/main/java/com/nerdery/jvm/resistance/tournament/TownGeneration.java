@@ -4,6 +4,8 @@ import java.security.SecureRandom;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * @author Josh Klun (jklun@nerdery.com)
@@ -13,7 +15,7 @@ public class TownGeneration {
     private List<Entrant> generationEntrants;
     private List<TownDay> days;
 
-    public TownGeneration(List<Entrant> generationEntrants, List<TownDay> days) {
+    private TownGeneration(List<Entrant> generationEntrants, List<TownDay> days) {
         this.generationEntrants = generationEntrants;
         this.days = days;
     }
@@ -72,9 +74,12 @@ public class TownGeneration {
             int patientSpread = maximumPatients - minimumPatients;
             SecureRandom random = new SecureRandom();
             int patientCount = minimumPatients + (random.nextInt() % patientSpread);
-            patientCount = patientCount + (patientCount % DOCTORS_PER_TOWN);
-            // TODO: This isn't even close to done.
-            return null;
+            patientCount = patientCount + (patientCount % entrants.size());
+            TownDay.TownDayBuilder townDayBuilder = TownDay.builder();
+            townDayBuilder.entrants(entrants);
+            return IntStream.of(patientCount)
+                    .mapToObj(i -> townDayBuilder.dayNumber(i).build())
+                    .collect(Collectors.toList());
         }
     }
 }

@@ -21,7 +21,7 @@ public class Tournament {
     private List<TownGeneration> generations;
     private int currentGenerationIndex;
 
-    public Tournament(List<Entrant> entrants, List<TownGeneration> generations) {
+    private Tournament(List<Entrant> entrants, List<TownGeneration> generations) {
         this.entrants = entrants;
         this.generations = generations;
         this.currentGenerationIndex = 0;

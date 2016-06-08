@@ -12,7 +12,7 @@ public class EntrantGenerationResult {
     private int bacterialCures;
     private int antibioticsPrescribed;
     private int patientsTreated;
-    private boolean triggeredExctinction;
+    private boolean triggeredExtinction;
 
     public EntrantGenerationResult(int score,
                                    int malpracticeSuits,
@@ -20,14 +20,14 @@ public class EntrantGenerationResult {
                                    int bacterialCures,
                                    int antibioticsPrescribed,
                                    int patientsTreated,
-                                   boolean triggeredExctinction) {
+                                   boolean triggeredExtinction) {
         this.score = score;
         this.malpracticeSuits = malpracticeSuits;
         this.viralCures = viralCures;
         this.bacterialCures = bacterialCures;
         this.antibioticsPrescribed = antibioticsPrescribed;
         this.patientsTreated = patientsTreated;
-        this.triggeredExctinction = triggeredExctinction;
+        this.triggeredExtinction = triggeredExtinction;
     }
 
     public int getScore() {
@@ -54,8 +54,8 @@ public class EntrantGenerationResult {
         return patientsTreated;
     }
 
-    public boolean isTriggeredExctinction() {
-        return triggeredExctinction;
+    public boolean isTriggeredExtinction() {
+        return triggeredExtinction;
     }
 
     @Override
@@ -69,12 +69,12 @@ public class EntrantGenerationResult {
                 bacterialCures == that.bacterialCures &&
                 antibioticsPrescribed == that.antibioticsPrescribed &&
                 patientsTreated == that.patientsTreated &&
-                triggeredExctinction == that.triggeredExctinction;
+                triggeredExtinction == that.triggeredExtinction;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(score, malpracticeSuits, viralCures, bacterialCures,
-                antibioticsPrescribed, patientsTreated, triggeredExctinction);
+                antibioticsPrescribed, patientsTreated, triggeredExtinction);
     }
 }
