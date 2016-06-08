@@ -1,4 +1,4 @@
-package com.nerdery.jvm.resistance.tournament;
+package com.nerdery.jvm.resistance.models.tournament;
 
 import com.nerdery.jvm.resistance.bots.DoctorBot;
 import org.reflections.Reflections;

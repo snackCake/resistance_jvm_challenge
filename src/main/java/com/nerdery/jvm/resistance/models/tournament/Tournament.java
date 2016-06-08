@@ -1,4 +1,4 @@
-package com.nerdery.jvm.resistance.tournament;
+package com.nerdery.jvm.resistance.models.tournament;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.math3.util.Combinations;

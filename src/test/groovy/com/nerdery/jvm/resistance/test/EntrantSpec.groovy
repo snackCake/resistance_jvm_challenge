@@ -1,7 +1,7 @@
 package com.nerdery.jvm.resistance.test
 
-import com.nerdery.jvm.resistance.tournament.Entrant
-import com.nerdery.jvm.resistance.tournament.EntrantGenerationResult
+import com.nerdery.jvm.resistance.models.tournament.Entrant
+import com.nerdery.jvm.resistance.models.tournament.EntrantGenerationResult
 import spock.lang.Specification
 
 /**
