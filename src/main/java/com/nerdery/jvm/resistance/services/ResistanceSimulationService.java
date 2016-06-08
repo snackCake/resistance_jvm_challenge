@@ -2,6 +2,7 @@ package com.nerdery.jvm.resistance.services;
 
 import com.nerdery.jvm.resistance.bots.DoctorBot;
 import com.nerdery.jvm.resistance.models.Patient;
+import com.nerdery.jvm.resistance.models.PatientOutcome;
 import com.nerdery.jvm.resistance.models.Prescription;
 import com.nerdery.jvm.resistance.models.tournament.Tournament;
 import com.nerdery.jvm.resistance.models.tournament.TownDay;
@@ -9,6 +10,7 @@ import com.nerdery.jvm.resistance.models.tournament.TownGeneration;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -17,24 +19,31 @@ import java.util.stream.IntStream;
  */
 public class ResistanceSimulationService {
 
+    private MicrobialSimulationService microbialSimulation;
+
+    public ResistanceSimulationService(MicrobialSimulationService microbialSimulation) {
+        this.microbialSimulation = microbialSimulation;
+    }
+
     public void runTournament(Tournament tournament) {
         tournament.getGenerations()
                 .stream()
                 .forEach(this::runGeneration);
     }
 
-    private void runGeneration(TownGeneration generation) {
+    private List<List<PatientOutcome>> runGeneration(TownGeneration generation) {
         final Collection<Prescription> previousDay = new ArrayList<>(generation.getEntrants().size());
-        generation.getDays()
+        return generation.getDays()
                 .stream()
-                .forEach(day -> {
-                    Collection<Prescription> prescriptions = runDay(day, previousDay);
+                .map(day -> {
+                    List<Prescription> prescriptions = runDay(day, previousDay);
                     previousDay.clear();
                     previousDay.addAll(prescriptions);
-                });
+                    return microbialSimulation.divineOutcomes(day.getPatients(), prescriptions);
+                }).collect(Collectors.toList());
     }
 
-    private Collection<Prescription> runDay(TownDay day, Collection<Prescription> previousDay) {
+    private List<Prescription> runDay(TownDay day, Collection<Prescription> previousDay) {
         return IntStream.range(0, day.getDoctors().size())
                 .parallel()
                 .mapToObj(i -> {

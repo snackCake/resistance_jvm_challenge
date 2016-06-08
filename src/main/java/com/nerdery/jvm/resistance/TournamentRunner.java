@@ -1,6 +1,7 @@
 package com.nerdery.jvm.resistance;
 
 import com.nerdery.jvm.resistance.models.tournament.Tournament;
+import com.nerdery.jvm.resistance.services.MicrobialSimulationService;
 import com.nerdery.jvm.resistance.services.ResistanceSimulationService;
 
 /**
@@ -16,7 +17,8 @@ public class TournamentRunner {
         Tournament tournament = Tournament.builder()
                 .entrantPackage(entrantPackage)
                 .build();
-        ResistanceSimulationService simulationService = new ResistanceSimulationService();
+        MicrobialSimulationService microbialService = new MicrobialSimulationService();
+        ResistanceSimulationService simulationService = new ResistanceSimulationService(microbialService);
         simulationService.runTournament(tournament);
     }
 }
