@@ -33,15 +33,15 @@ class DocCottleBot extends DoctorBot {
       // "I find it absolutely amazing. You people went to all the trouble to appear human and didn't upgrade the plumbing!"
       PrescribeAntibiotics
     } else if(looksViral(temperature)) {
-      if(profiles.values.exists(_.isCautious)) {
+      if(profiles.values.exists(doctor => doctor.isCautious || doctor.isReckless)) {
+        // "Jaw set nicely. You're done here."
+        PrescribeAntibiotics
+      } else {
         // "Freaking hypochondriac. One on every bloody ship."
         PrescribeRest
-      } else {
-        // Is he gonna make it? "How should I know? I'm not a psychic."
-        PrescribeAntibiotics
       }
     } else {
-      // "Jaw set nicely. You're done here."
+      // Is he gonna make it? "How should I know? I'm not a psychic."
       PrescribeAntibiotics
     }
   }
@@ -75,7 +75,15 @@ class DocCottleBot extends DoctorBot {
    * @param prescription The prescription to judge.
    * @return True if the prescription was reckless, false otherwise.
    */
-  private def isPrescriptionReckless(prescription: Prescription) = prescription.getTemperature < 100.75f && prescription.isPrescribedAntibiotics
+  private def prescriptionCategorization(prescription: Prescription) = {
+    if(prescription.getTemperature < 100.75f && prescription.isPrescribedAntibiotics) {
+      Reckless
+    } else if (prescription.getTemperature > 100.75f && !prescription.isPrescribedAntibiotics) {
+      Cautious
+    } else {
+      Reasonable
+    }
+  }
 
   /**
    * Contains a recollection of a doctor's actions and perceived recklessness.
@@ -84,12 +92,13 @@ class DocCottleBot extends DoctorBot {
    * @param prescriptionHistory The prescriptions this doctor has made in the past.
    */
   private case class DoctorProfile(doctorName: String, prescriptionHistory: Seq[Prescription] = Nil) {
-    def isReckless = recklessnessIndex > -2
-    def isCautious = recklessnessIndex <= -2
+    def isReckless = recklessnessIndex >= RecklessnessThreshold
+    def isCautious = recklessnessIndex <= CautiousnessThreshold
 
-    def recklessnessIndex = prescriptionHistory.map(isPrescriptionReckless).map {
-      case true => 1
-      case false => -1
+    def recklessnessIndex = prescriptionHistory.map(prescriptionCategorization).map {
+      case Reckless => 1
+      case Cautious => -1
+      case Reasonable => 0
     }.sum
 
   }
@@ -103,4 +112,19 @@ object DocCottleBot {
    * Percentage chance of bacterial infection at which the Doc must assume the worst.
    */
   val AntibioticsThreshold = 0.4
+
+  /**
+   * Number of net reckless decisions a doctor must make to be considered reckless.
+   */
+  val RecklessnessThreshold = 4
+
+  /**
+   * Number of net cautious decisions a doctor must make to be considered cautious.
+   */
+  val CautiousnessThreshold = -2
+
+  sealed trait PrescriptionCategorization
+  case object Reckless extends PrescriptionCategorization
+  case object Reasonable extends PrescriptionCategorization
+  case object Cautious extends PrescriptionCategorization
 }
