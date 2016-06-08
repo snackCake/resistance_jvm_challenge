@@ -58,21 +58,21 @@ public class HopperBayesianBot implements DoctorBot {
         System.out.println("Probability of money if prescribe antibiotic: " + probMoneyIfPrescribeAntibiotic);
         System.out.println("Probability of money if prescribe rest: " + probMoneyIfPrescribeRest);
 
-//        float prescribeAntibioticMoneyFactor = probMoneyIfPrescribeAntibiotic * (MONEY_ANTIBIOTIC_BAD + MONEY_ANTIBIOTIC_GOOD);
-//        float prescribeRestMoneyFactor = probMoneyIfPrescribeRest * (MONEY_REST_BAD + MONEY_REST_GOOD);
-//        System.out.println("Prescribe antibiotic money factor: " + prescribeAntibioticMoneyFactor);
-//        System.out.println("Prescribe rest money factor: " + prescribeRestMoneyFactor);
-//
-//        boolean prescribeDrugs = prescribeAntibioticMoneyFactor >= prescribeRestMoneyFactor;
+        /*float prescribeAntibioticMoneyFactor = probMoneyIfPrescribeAntibiotic * (MONEY_ANTIBIOTIC_BAD + MONEY_ANTIBIOTIC_GOOD);
+        float prescribeRestMoneyFactor = probMoneyIfPrescribeRest * (MONEY_REST_BAD + MONEY_REST_GOOD);
+        System.out.println("Prescribe antibiotic money factor: " + prescribeAntibioticMoneyFactor);
+        System.out.println("Prescribe rest money factor: " + prescribeRestMoneyFactor);
+        boolean prescribeDrugs = prescribeAntibioticMoneyFactor >= prescribeRestMoneyFactor;*/
+
         boolean prescribeDrugs = probMoneyIfPrescribeAntibiotic > probMoneyIfPrescribeRest;
         System.out.println("Prescribe antibiotics?: " + prescribeDrugs);
 
         StatusUpdate status = buildStatus(patientTemperature, prescribeDrugs, probMoneyIfPrescribeAntibiotic, probMoneyIfPrescribeRest);
-        try {
+        /*try {
             twitter.updateStatus(status);
         } catch (TwitterException e) {
             e.printStackTrace();
-        }
+        }*/
 
         return prescribeDrugs;
     }
