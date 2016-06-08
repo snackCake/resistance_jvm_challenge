@@ -1,4 +1,4 @@
-package com.nerdery.jvm.resistance.bots.entrants;
+package com.nerdery.jvm.resistance.bots.entrants.zbrown;
 
 import com.nerdery.jvm.resistance.bots.DoctorBot;
 import com.nerdery.jvm.resistance.models.Prescription;
