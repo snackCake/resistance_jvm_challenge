@@ -40,8 +40,7 @@ public class DrSpacemanBot implements DoctorBot {
                     continue;
                 }
 
-                OtherDoctor otherDoctor = new OtherDoctor(userId);
-                otherDoctors.put(userId, otherDoctor);
+                otherDoctors.put(userId, new OtherDoctor());
             }
         } else {
             for (Prescription prescription : previousPrescriptions) {
@@ -60,18 +59,13 @@ public class DrSpacemanBot implements DoctorBot {
 
     private class OtherDoctor {
 
-        private final String userId;
         private List<Prescription> prescriptionHistory = new ArrayList<>();
 
-        public OtherDoctor(String userId) {
-            this.userId = userId;
-        }
-
-        public void addPrescription(Prescription prescription) {
+        void addPrescription(Prescription prescription) {
             prescriptionHistory.add(prescription);
         }
 
-        public double getAveragePrescriptionRate(float temperatureCeilingNonInclusive) {
+        double getAveragePrescriptionRate(float temperatureCeilingNonInclusive) {
             return prescriptionHistory.stream().filter(p -> p.getTemperature() < temperatureCeilingNonInclusive).
                     mapToDouble(p -> p.isPrescribedAntibiotics() ? 1 : 0).average().orElse(0);
         }
@@ -79,12 +73,12 @@ public class DrSpacemanBot implements DoctorBot {
 
     private static class PrescriptionStrategyFactory {
 
-        public static final PrescriptionStrategyFactory INSTANCE = new PrescriptionStrategyFactory();
+        static final PrescriptionStrategyFactory INSTANCE = new PrescriptionStrategyFactory();
 
         private PrescriptionStrategyFactory() {
         }
 
-        public PrescriptionStrategy getStrategy(Collection<OtherDoctor> otherDoctors) {
+        PrescriptionStrategy getStrategy(Collection<OtherDoctor> otherDoctors) {
             float aggression = 0;
 
             for (OtherDoctor doctor : otherDoctors) {
@@ -167,12 +161,12 @@ public class DrSpacemanBot implements DoctorBot {
 
     private static abstract class PrescriptionStrategy {
 
-        protected static final int MIN_ROUND_LIMIT = 25;
+        static final int MIN_ROUND_LIMIT = 25;
 
-        protected final PrimitiveIterator.OfInt randomNumberGenerator = new Random(System.currentTimeMillis()).ints(1, 101).iterator();
-        protected int roundNumber;
+        final PrimitiveIterator.OfInt randomNumberGenerator = new Random(System.currentTimeMillis()).ints(1, 101).iterator();
+        int roundNumber;
 
-        public boolean getPrescription(float patientTemperature, int roundNumber) {
+        boolean getPrescription(float patientTemperature, int roundNumber) {
             this.roundNumber = roundNumber;
 
             if (patientTemperature < NO_INFECTION_CHANCE_TEMP_CEILING) {
@@ -198,7 +192,7 @@ public class DrSpacemanBot implements DoctorBot {
 
         protected abstract boolean getHighInfectionChancePrescription();
 
-        protected boolean getDefiniteInfectionChancePrescription() {
+        boolean getDefiniteInfectionChancePrescription() {
             return true;
         }
 
@@ -208,7 +202,7 @@ public class DrSpacemanBot implements DoctorBot {
          * @param prescribeChance the percent chance that antibiotics will be prescribed
          * @return {@code true} if antibiotics are prescribed; {@code false} otherwise
          */
-        protected boolean prescribeRandom(int prescribeChance) {
+        boolean prescribeRandom(int prescribeChance) {
             return randomNumberGenerator.nextInt() <= prescribeChance;
         }
     }
@@ -235,7 +229,7 @@ public class DrSpacemanBot implements DoctorBot {
 
         @Override
         protected boolean getLowInfectionChancePrescription() {
-            return roundNumber < MIN_ROUND_LIMIT * .8 ? prescribeRandom(25) : false;
+            return roundNumber < MIN_ROUND_LIMIT * .8 && prescribeRandom(25);
         }
 
         @Override
