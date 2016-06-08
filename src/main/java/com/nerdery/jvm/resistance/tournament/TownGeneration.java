@@ -38,6 +38,14 @@ public class TownGeneration {
         return Objects.hash(generationEntrants, days);
     }
 
+    @Override
+    public String toString() {
+        return "TownGeneration{" +
+                "generationEntrants=" + generationEntrants +
+                ", days=" + days +
+                '}';
+    }
+
     public static class TownGenerationBuilder {
 
         private List<Entrant> entrants;

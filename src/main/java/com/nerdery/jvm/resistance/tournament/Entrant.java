@@ -47,5 +47,13 @@ public class Entrant {
     public int hashCode() {
         return Objects.hash(doctorBot, results);
     }
+
+    @Override
+    public String toString() {
+        return "Entrant{" +
+                "doctorBot=" + doctorBot +
+                ", results=" + results +
+                '}';
+    }
 }
 

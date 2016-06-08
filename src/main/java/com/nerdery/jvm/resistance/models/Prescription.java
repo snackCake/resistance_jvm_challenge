@@ -45,4 +45,13 @@ public class Prescription {
     public int hashCode() {
         return Objects.hash(userId, prescribedAntibiotics, temperature);
     }
+
+    @Override
+    public String toString() {
+        return "Prescription{" +
+                "userId='" + userId + '\'' +
+                ", prescribedAntibiotics=" + prescribedAntibiotics +
+                ", temperature=" + temperature +
+                '}';
+    }
 }

@@ -77,4 +77,17 @@ public class EntrantGenerationResult {
         return Objects.hash(score, malpracticeSuits, viralCures, bacterialCures,
                 antibioticsPrescribed, patientsTreated, triggeredExtinction);
     }
+
+    @Override
+    public String toString() {
+        return "EntrantGenerationResult{" +
+                "score=" + score +
+                ", malpracticeSuits=" + malpracticeSuits +
+                ", viralCures=" + viralCures +
+                ", bacterialCures=" + bacterialCures +
+                ", antibioticsPrescribed=" + antibioticsPrescribed +
+                ", patientsTreated=" + patientsTreated +
+                ", triggeredExtinction=" + triggeredExtinction +
+                '}';
+    }
 }

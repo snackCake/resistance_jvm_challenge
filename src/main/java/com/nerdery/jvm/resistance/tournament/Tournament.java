@@ -8,6 +8,7 @@ import org.reflections.Reflections;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -25,6 +26,31 @@ public class Tournament {
         this.entrants = entrants;
         this.generations = generations;
         this.currentGenerationIndex = 0;
+    }
+
+
+    @Override
+    public boolean equals(Object atheO) {
+        if (this == atheO) return true;
+        if (atheO == null || getClass() != atheO.getClass()) return false;
+        Tournament athat = (Tournament) atheO;
+        return currentGenerationIndex == athat.currentGenerationIndex &&
+                Objects.equals(entrants, athat.entrants) &&
+                Objects.equals(generations, athat.generations);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(entrants, generations, currentGenerationIndex);
+    }
+
+    @Override
+    public String toString() {
+        return "Tournament{" +
+                "entrants=" + entrants +
+                ", generations=" + generations +
+                ", currentGenerationIndex=" + currentGenerationIndex +
+                '}';
     }
 
     public static TournamentBuilder builder() {

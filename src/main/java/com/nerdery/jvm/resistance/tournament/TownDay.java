@@ -54,6 +54,15 @@ public class TownDay {
         return Objects.hash(dayNumber, doctors, patients);
     }
 
+    @Override
+    public String toString() {
+        return "TownDay{" +
+                "dayNumber=" + dayNumber +
+                ", doctors=" + doctors +
+                ", patients=" + patients +
+                '}';
+    }
+
     public static class TownDayBuilder {
 
         private List<Entrant> entrants;
