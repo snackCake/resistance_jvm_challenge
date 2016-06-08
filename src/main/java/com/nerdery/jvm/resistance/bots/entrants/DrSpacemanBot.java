@@ -18,8 +18,8 @@ public class DrSpacemanBot implements DoctorBot {
     private static final float HIGH_INFECTION_CHANCE_TEMP_CEILING = 103;
     private static final float DEFINITE_INFECTION_CHANCE_TEMP_CEILING = Float.MAX_VALUE;
 
-    private final Random randomNumberGenerator = new Random(System.currentTimeMillis());
     private final Map<String, OtherDoctor> otherDoctors = new HashMap<>();
+    private int roundNumber;
 
     @Override
     public String getUserId() {
@@ -28,6 +28,10 @@ public class DrSpacemanBot implements DoctorBot {
 
     @Override
     public boolean prescribeAntibiotic(float patientTemperature, Collection<Prescription> previousPrescriptions) {
+        roundNumber++;
+
+        PrescriptionStrategy strategy = new StandardStrategy();
+
         if (otherDoctors.isEmpty()) {
             for (Prescription prescription : previousPrescriptions) {
                 String userId = prescription.getUserId();
@@ -39,18 +43,19 @@ public class DrSpacemanBot implements DoctorBot {
                 OtherDoctor otherDoctor = new OtherDoctor(userId);
                 otherDoctors.put(userId, otherDoctor);
             }
-        }
+        } else {
+            for (Prescription prescription : previousPrescriptions) {
+                if (USER_ID.equals(prescription.getUserId())) {
+                    continue;
+                }
 
-        for (Prescription prescription : previousPrescriptions) {
-            if (USER_ID.equals(prescription.getUserId())) {
-                continue;
+                otherDoctors.get(prescription.getUserId()).addPrescription(prescription);
             }
 
-            otherDoctors.get(prescription.getUserId()).addPrescription(prescription);
+            strategy = PrescriptionStrategyFactory.INSTANCE.getStrategy(otherDoctors.values());
         }
 
-        PrescriptionStrategy strategy = PrescriptionStrategyFactory.INSTANCE.getStrategy(otherDoctors.values());
-        return strategy.getPrescription(patientTemperature);
+        return strategy.getPrescription(patientTemperature, roundNumber);
     }
 
     private class OtherDoctor {
@@ -76,8 +81,6 @@ public class DrSpacemanBot implements DoctorBot {
 
         public static final PrescriptionStrategyFactory INSTANCE = new PrescriptionStrategyFactory();
 
-        private static final float MAX_PRESCRIPTION_ADD_AGGRESSION = 1;
-
         private PrescriptionStrategyFactory() {
         }
 
@@ -88,20 +91,20 @@ public class DrSpacemanBot implements DoctorBot {
                 aggression += getAggression(doctor);
             }
 
-            float aggressionPercentage = aggression / (MAX_PRESCRIPTION_ADD_AGGRESSION * 4);
+            float aggressionPercentage = aggression / 4;
 
             if (aggressionPercentage <= 0) {
-                return new StandardStrategy();
+                return new AggressiveStrategy();
             } else if (aggressionPercentage < .25) {
-                return new StandardStrategy();
+                return new ProgressivelyAggressiveStrategy();
             } else if (aggressionPercentage < .5) {
                 return new StandardStrategy();
             } else if (aggressionPercentage < .75) {
-                return new StandardStrategy();
+                return new DefensiveStrategy();
             } else if (aggressionPercentage < .99) {
-                return new StandardStrategy();
+                return new SafeStrategy();
             } else {
-                return new StandardStrategy();
+                return new OverprescribeDefenseStrategy();
             }
         }
 
@@ -126,7 +129,7 @@ public class DrSpacemanBot implements DoctorBot {
                 if (lowInfectionChancePrescriptionRate == 1) {
                     aggression += 1;
                 } else {
-                    aggression += .6;
+                    aggression += .5;
                 }
             } else if (lowInfectionChancePrescriptionRate == 0) {
                 aggression -= .25;
@@ -163,7 +166,15 @@ public class DrSpacemanBot implements DoctorBot {
     }
 
     private static abstract class PrescriptionStrategy {
-        public boolean getPrescription(float patientTemperature) {
+
+        protected static final int MIN_ROUND_LIMIT = 25;
+
+        protected final PrimitiveIterator.OfInt randomNumberGenerator = new Random(System.currentTimeMillis()).ints(1, 101).iterator();
+        protected int roundNumber;
+
+        public boolean getPrescription(float patientTemperature, int roundNumber) {
+            this.roundNumber = roundNumber;
+
             if (patientTemperature < NO_INFECTION_CHANCE_TEMP_CEILING) {
                 return getNoInfectionChancePrescription();
             } else if (patientTemperature < LOW_INFECTION_CHANCE_TEMP_CEILING) {
@@ -190,9 +201,19 @@ public class DrSpacemanBot implements DoctorBot {
         protected boolean getDefiniteInfectionChancePrescription() {
             return true;
         }
+
+        /**
+         * Randomly decides whether or not to prescribe antibiotics based on a given percent chance.
+         *
+         * @param prescribeChance the percent chance that antibiotics will be prescribed
+         * @return {@code true} if antibiotics are prescribed; {@code false} otherwise
+         */
+        protected boolean prescribeRandom(int prescribeChance) {
+            return randomNumberGenerator.nextInt() <= prescribeChance;
+        }
     }
 
-    private static class StandardStrategy extends PrescriptionStrategy {
+    private static class SafeStrategy extends PrescriptionStrategy {
 
         @Override
         protected boolean getLowInfectionChancePrescription() {
@@ -206,7 +227,112 @@ public class DrSpacemanBot implements DoctorBot {
 
         @Override
         protected boolean getHighInfectionChancePrescription() {
+            return prescribeRandom(40);
+        }
+    }
+
+    private static class DefensiveStrategy extends PrescriptionStrategy {
+
+        @Override
+        protected boolean getLowInfectionChancePrescription() {
+            return roundNumber < MIN_ROUND_LIMIT * .8 ? prescribeRandom(25) : false;
+        }
+
+        @Override
+        protected boolean getIndeterminateChancePrescription() {
+            return roundNumber < MIN_ROUND_LIMIT * .8 ? prescribeRandom(35) : prescribeRandom(20);
+        }
+
+        @Override
+        protected boolean getHighInfectionChancePrescription() {
+            return roundNumber < MIN_ROUND_LIMIT * .8 ? prescribeRandom(60) : prescribeRandom(40);
+        }
+    }
+
+    private static class StandardStrategy extends PrescriptionStrategy {
+
+        @Override
+        protected boolean getLowInfectionChancePrescription() {
+            return prescribeRandom(25);
+        }
+
+        @Override
+        protected boolean getIndeterminateChancePrescription() {
+            return prescribeRandom(50);
+        }
+
+        @Override
+        protected boolean getHighInfectionChancePrescription() {
+            return prescribeRandom(75);
+        }
+    }
+
+    private static class AggressiveStrategy extends PrescriptionStrategy {
+
+        @Override
+        protected boolean getNoInfectionChancePrescription() {
             return true;
+        }
+
+        @Override
+        protected boolean getLowInfectionChancePrescription() {
+            return true;
+        }
+
+        @Override
+        protected boolean getIndeterminateChancePrescription() {
+            return true;
+        }
+
+        @Override
+        protected boolean getHighInfectionChancePrescription() {
+            return true;
+        }
+    }
+
+    private static class ProgressivelyAggressiveStrategy extends PrescriptionStrategy {
+
+        @Override
+        protected boolean getNoInfectionChancePrescription() {
+            return roundNumber >= MIN_ROUND_LIMIT * .8;
+        }
+
+        @Override
+        protected boolean getLowInfectionChancePrescription() {
+            return roundNumber >= MIN_ROUND_LIMIT * .6;
+        }
+
+        @Override
+        protected boolean getIndeterminateChancePrescription() {
+            return roundNumber >= MIN_ROUND_LIMIT * .4;
+        }
+
+        @Override
+        protected boolean getHighInfectionChancePrescription() {
+            return roundNumber >= MIN_ROUND_LIMIT * .2;
+        }
+    }
+
+    private static class OverprescribeDefenseStrategy extends PrescriptionStrategy {
+
+        @Override
+        protected boolean getNoInfectionChancePrescription() {
+            return roundNumber >= MIN_ROUND_LIMIT * .2;
+        }
+
+        @Override
+        protected boolean getLowInfectionChancePrescription() {
+            return roundNumber >= MIN_ROUND_LIMIT * .2;
+        }
+
+        @Override
+        protected boolean getIndeterminateChancePrescription() {
+            return roundNumber >= MIN_ROUND_LIMIT * .2;
+        }
+
+        @Override
+        protected boolean getHighInfectionChancePrescription() {
+            return roundNumber >= MIN_ROUND_LIMIT * .2;
         }
     }
 }
