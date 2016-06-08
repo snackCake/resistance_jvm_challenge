@@ -6,7 +6,7 @@ import com.nerdery.jvm.resistance.models.Prescription;
 import java.util.Collection;
 
 /**
- * Bot that simulates Dr. Leo Spaceman.
+ * Bot that simulates Dr. Nicholas Riviera.
  *
  * @author Josh Klun (jklun@nerdery.com)
  */
