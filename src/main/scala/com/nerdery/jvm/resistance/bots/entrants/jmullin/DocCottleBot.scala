@@ -10,6 +10,8 @@ import scala.language.postfixOps
 
 /**
  * Major Sherman Cottle, M.D., Chief Medical Officer, Battlestar Galactica.
+ *
+ * @author Justin Mullin
  */
 class DocCottleBot extends DoctorBot {
   import DocCottleBot._
@@ -17,7 +19,7 @@ class DocCottleBot extends DoctorBot {
   override def getUserId = "jmullin"
 
   /**
-   * Store a profile on all the doctor's we've seen.
+   * Store a profile on all the doctors we've seen.
    */
   private var profiles = Map[String, DoctorProfile]()
 
@@ -25,14 +27,15 @@ class DocCottleBot extends DoctorBot {
     // Update our prescription history with the results from yesterday.
     previousPrescriptions foreach { prescription =>
       val profile = profiles.getOrElse(prescription.getUserId, DoctorProfile(prescription.getUserId))
-      profiles = profiles +
-        (prescription.getUserId -> profile.copy(prescriptionHistory = profile.prescriptionHistory :+ prescription))
+      if(profile.doctorName != getUserId) {
+        profiles = profiles + (prescription.getUserId -> profile.copy(prescriptionHistory = profile.prescriptionHistory :+ prescription))
+      }
     }
 
     if(profiles.contains("jklun") && temperature < 102.0f && previousPrescriptions.exists(!_.isPrescribedAntibiotics)) {
       // "I find it absolutely amazing. You people went to all the trouble to appear human and didn't upgrade the plumbing!"
       PrescribeAntibiotics
-    } else if(looksViral(temperature)) {
+    } else if(riskThresholdIsLow(temperature)) {
       if(profiles.values.exists(doctor => doctor.isCautious || doctor.isReckless)) {
         // "Jaw set nicely. You're done here."
         PrescribeAntibiotics
@@ -47,12 +50,14 @@ class DocCottleBot extends DoctorBot {
   }
 
   /**
-   * Determines if a given temperature should be assumed a viral infection.
+   * Determines if a given temperature should be assumed safe.
    *
    * @param temperature The patient's temperature.
    * @return
    */
-  private def looksViral(temperature: Float) = chanceInfected(temperature) < AntibioticsThreshold
+  private def riskThresholdIsLow(temperature: Float) = {
+    chanceOfBacterialInfection(temperature)*chanceOfHospitalization(temperature) < RiskThreshold
+  }
 
   /**
    * Calculates the chance of a bacterial infection given a patient's temperature.
@@ -60,13 +65,21 @@ class DocCottleBot extends DoctorBot {
    * @param temperature The patient's temperature.
    * @return The chance this patient's infection is bacterial and requires antibiotics.
    */
-  private def chanceInfected(temperature: Float) = temperature match {
+  private def chanceOfBacterialInfection(temperature: Float) = temperature match {
     case _ if temperature < 100.0f => 0.0f
     case _ if temperature < 101.0f => 0.25f
     case _ if temperature < 102.0f => 0.5f
     case _ if temperature < 103.0f => 0.75f
     case _ => 1.0f
   }
+
+  /**
+   * Calculates the chance of hospitalization assuming the patient has a bacterial infection.
+   *
+   * @param temperature The patient's temperature.
+   * @return The chance a bacterial infection would send this patient to the hospital.
+   */
+  private def chanceOfHospitalization(temperature: Float) = math.pow((temperature - 100.0) / 3.0, 5.0)
 
   /**
    * Determines if a given prescription was reckless. A reckless prescription is one where
@@ -76,9 +89,11 @@ class DocCottleBot extends DoctorBot {
    * @return True if the prescription was reckless, false otherwise.
    */
   private def prescriptionCategorization(prescription: Prescription) = {
-    if(prescription.getTemperature < 100.75f && prescription.isPrescribedAntibiotics) {
+    val hospitalizationChance = chanceOfBacterialInfection(prescription.getTemperature)*chanceOfHospitalization(prescription.getTemperature)
+
+    if(hospitalizationChance > 0 && hospitalizationChance <= RiskThreshold && prescription.isPrescribedAntibiotics) {
       Reckless
-    } else if (prescription.getTemperature > 100.75f && !prescription.isPrescribedAntibiotics) {
+    } else if (hospitalizationChance >= RiskThreshold && !prescription.isPrescribedAntibiotics) {
       Cautious
     } else {
       Reasonable
@@ -109,9 +124,9 @@ object DocCottleBot {
   val PrescribeRest = false
 
   /**
-   * Percentage chance of bacterial infection at which the Doc must assume the worst.
+   * Percentage chance of hospitalization at which the Doc must assume the worst.
    */
-  val AntibioticsThreshold = 0.4
+  val RiskThreshold = 1.0/3.0
 
   /**
    * Number of net reckless decisions a doctor must make to be considered reckless.
