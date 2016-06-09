@@ -89,7 +89,7 @@ class MicrobialSimulationServiceSpec extends Specification {
                              new Prescription("test", false, 102.5f), new Prescription("test", false, 102.5f),
                              new Prescription("test", false, 102.5f), new Prescription("test", false, 102.5f)]
 
-        then: "Incorrect diagnoses get the correct outcomes"
+        then: "Missed bacterial infections should all have the same outcome on the same day"
         println(patients)
         println(prescriptions)
         def outcomes = service.divineOutcomes(patients, prescriptions)
