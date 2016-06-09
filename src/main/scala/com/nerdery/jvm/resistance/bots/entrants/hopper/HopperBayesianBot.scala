@@ -1,5 +1,6 @@
 package com.nerdery.jvm.resistance.bots.entrants.hopper
 
+import java.security.SecureRandom
 import java.util
 import java.util.Random
 
@@ -23,7 +24,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
   *
   * @author Stephen Hopper
   */
-class HopperBayesianBot extends DoctorBot {
+class HopperBayesianBot(tweetMuch: Boolean = true) extends DoctorBot {
   import HopperBayesianBot._
   private val twitter = TwitterFactory.getSingleton
   private val prescriptionMap = mutable.Map[String, ListBuffer[PrescriptionData]]()
@@ -49,14 +50,17 @@ class HopperBayesianBot extends DoctorBot {
     println(s"Prescribe antibiotics?: $prescribeDrugs")
 
     val status: StatusUpdate = buildStatus(patientTemperature, prescribeDrugs, probMoneyIfPrescribeAntibiotic, probMoneyIfPrescribeRest)
-    try {
-      Future {
-        twitter.updateStatus(status)
+
+    if (tweetMuch) {
+      try {
+        Future {
+          twitter.updateStatus(status)
+        }
+      } catch {
+        case e: Exception => //I want there to be no disintegrations
+          println(s"Something went wrong whilst tweeting: $e")
+          e.printStackTrace()
       }
-    } catch {
-      case e: Exception => //I want there to be no disintegrations
-        println(s"Something went wrong whilst tweeting: $e")
-        e.printStackTrace()
     }
 
     prescribeDrugs
@@ -124,7 +128,7 @@ class HopperBayesianBot extends DoctorBot {
 
   private def probUnluckyGivenRest(temp: PatientTemp): Float = probInfected(temp) * randy
 
-  private def randy: Float = new Random().nextFloat
+  private def randy: Float = new SecureRandom().nextFloat * 0.2f
 
   private def probInfected(temp: PatientTemp): Float = temp.getProbInfected
 }

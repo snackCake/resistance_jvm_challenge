@@ -13,7 +13,7 @@ import static org.junit.Assert.*;
  */
 public class HopperBayesianBotTest {
 
-    private HopperBayesianBot bot = new HopperBayesianBot();
+    private HopperBayesianBot bot = new HopperBayesianBot(false);
     private List<Prescription> emptyPrescriptions = Collections.emptyList();
 
     @Test
