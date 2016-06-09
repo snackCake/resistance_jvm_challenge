@@ -126,9 +126,9 @@ class HopperBayesianBot(tweetMuch: Boolean = true) extends DoctorBot {
 
   private def probLuckyGivenRest(temp: PatientTemp): Float = 1.0f - probUnluckyGivenRest(temp)
 
-  private def probUnluckyGivenRest(temp: PatientTemp): Float = probInfected(temp) * randy
+  private def probUnluckyGivenRest(temp: PatientTemp): Float = probInfected(temp) * Math.min(1.0f, randy + 0.5f)
 
-  private def randy: Float = new SecureRandom().nextFloat * 0.2f
+  private def randy: Float = new SecureRandom().nextFloat
 
   private def probInfected(temp: PatientTemp): Float = temp.getProbInfected
 }
@@ -137,7 +137,7 @@ object HopperBayesianBot {
   private val MIN_ROUNDS_FOR_DOC_PROB_CALC: Int = 9
   private val DEFAULT_DOC_PROB_CALC: Float = 0.9f
   private val MIN_SIMILAR_PRESCRIPTION_PROB_CALC: Int = 5
-  private val WEIGHT_SIMILAR_PRESCRIPTION_PROB: Float = 0.5f
+  private val WEIGHT_SIMILAR_PRESCRIPTION_PROB: Float = 0.9f
   private val WEIGHT_OVERALL_PRESCRIPTION_PROB: Float = 1 - WEIGHT_SIMILAR_PRESCRIPTION_PROB
   /*private val MONEY_ANTIBIOTIC_GOOD: Int = 3
   private val MONEY_ANTIBIOTIC_BAD: Int = -100
