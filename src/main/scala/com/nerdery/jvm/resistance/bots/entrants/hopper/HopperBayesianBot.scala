@@ -2,7 +2,6 @@ package com.nerdery.jvm.resistance.bots.entrants.hopper
 
 import java.security.SecureRandom
 import java.util
-import java.util.Random
 
 import com.nerdery.jvm.resistance.bots.DoctorBot
 import com.nerdery.jvm.resistance.models.Prescription
@@ -11,8 +10,6 @@ import twitter4j.{StatusUpdate, TwitterFactory}
 import scala.collection.JavaConversions._
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
   * The Hopper bot. Uses conditional probabilities. Also violates
@@ -28,7 +25,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
   */
 class HopperBayesianBot(tweetMuch: Boolean = true) extends DoctorBot {
   import HopperBayesianBot._
-  private val twitter = TwitterFactory.getSingleton
   private val prescriptionMap = mutable.Map[String, ListBuffer[PrescriptionData]]()
 
   override def getUserId: String = "hopper"
@@ -55,13 +51,11 @@ class HopperBayesianBot(tweetMuch: Boolean = true) extends DoctorBot {
 
     if (tweetMuch) {
       try {
-        Future {
-          twitter.updateStatus(status)
-        }
+        twitter.updateStatus(status)
       } catch {
-        case e: Exception => //I want there to be no disintegrations
-          println(s"Something went wrong whilst tweeting: $e")
-          e.printStackTrace()
+        case t: Throwable =>
+          println(s"Something went wrong whilst tweeting: $t")
+          t.printStackTrace()
       }
     }
 
@@ -141,6 +135,8 @@ object HopperBayesianBot {
   private val MIN_SIMILAR_PRESCRIPTION_PROB_CALC: Int = 5
   private val WEIGHT_SIMILAR_PRESCRIPTION_PROB: Float = 0.9f
   private val WEIGHT_OVERALL_PRESCRIPTION_PROB: Float = 1 - WEIGHT_SIMILAR_PRESCRIPTION_PROB
+
+  private lazy val twitter = TwitterFactory.getSingleton
   /*private val MONEY_ANTIBIOTIC_GOOD: Int = 3
   private val MONEY_ANTIBIOTIC_BAD: Int = -100
   private val MONEY_REST_GOOD: Int = 1
