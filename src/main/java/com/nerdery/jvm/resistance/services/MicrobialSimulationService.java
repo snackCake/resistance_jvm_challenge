@@ -23,7 +23,6 @@ public class MicrobialSimulationService {
     }
 
     public List<PatientOutcome> divineOutcomes(List<Patient> patients, List<Prescription> prescriptions) {
-        // TODO: Test Cases!
         return IntStream.range(0, patients.size()).mapToObj(i -> {
             Patient patient = patients.get(i);
             Prescription prescription = prescriptions.get(i);
