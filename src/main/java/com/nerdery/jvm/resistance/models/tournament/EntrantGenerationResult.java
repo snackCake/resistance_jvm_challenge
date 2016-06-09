@@ -1,4 +1,4 @@
-package com.nerdery.jvm.resistance.tournament;
+package com.nerdery.jvm.resistance.models.tournament;
 
 import java.util.Objects;
 
@@ -12,7 +12,7 @@ public class EntrantGenerationResult {
     private int bacterialCures;
     private int antibioticsPrescribed;
     private int patientsTreated;
-    private boolean triggeredExtinction;
+    private boolean zombieApocalypseTriggered;
 
     public EntrantGenerationResult(int score,
                                    int malpracticeSuits,
@@ -20,14 +20,14 @@ public class EntrantGenerationResult {
                                    int bacterialCures,
                                    int antibioticsPrescribed,
                                    int patientsTreated,
-                                   boolean triggeredExtinction) {
+                                   boolean zombieApocalypseTriggered) {
         this.score = score;
         this.malpracticeSuits = malpracticeSuits;
         this.viralCures = viralCures;
         this.bacterialCures = bacterialCures;
         this.antibioticsPrescribed = antibioticsPrescribed;
         this.patientsTreated = patientsTreated;
-        this.triggeredExtinction = triggeredExtinction;
+        this.zombieApocalypseTriggered = zombieApocalypseTriggered;
     }
 
     public int getScore() {
@@ -54,8 +54,8 @@ public class EntrantGenerationResult {
         return patientsTreated;
     }
 
-    public boolean isTriggeredExtinction() {
-        return triggeredExtinction;
+    public boolean isZombieApocalypseTriggered() {
+        return zombieApocalypseTriggered;
     }
 
     @Override
@@ -69,13 +69,13 @@ public class EntrantGenerationResult {
                 bacterialCures == that.bacterialCures &&
                 antibioticsPrescribed == that.antibioticsPrescribed &&
                 patientsTreated == that.patientsTreated &&
-                triggeredExtinction == that.triggeredExtinction;
+                zombieApocalypseTriggered == that.zombieApocalypseTriggered;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(score, malpracticeSuits, viralCures, bacterialCures,
-                antibioticsPrescribed, patientsTreated, triggeredExtinction);
+                antibioticsPrescribed, patientsTreated, zombieApocalypseTriggered);
     }
 
     @Override
@@ -87,7 +87,7 @@ public class EntrantGenerationResult {
                 ", bacterialCures=" + bacterialCures +
                 ", antibioticsPrescribed=" + antibioticsPrescribed +
                 ", patientsTreated=" + patientsTreated +
-                ", triggeredExtinction=" + triggeredExtinction +
+                ", zombieApocalypseTriggered=" + zombieApocalypseTriggered +
                 '}';
     }
 }

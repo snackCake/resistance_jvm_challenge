@@ -1,9 +1,10 @@
-package com.nerdery.jvm.resistance.tournament;
+package com.nerdery.jvm.resistance.models.tournament;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.math3.util.Combinations;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -12,32 +13,32 @@ import java.util.stream.Collectors;
  * @author Josh Klun (jklun@nerdery.com)
  */
 public class Tournament {
-    public static final int MAXIMUM_PATIENTS = 200;
-    public static final int MINIMUM_PATIENTS = 100;
+    public static final int MAXIMUM_DAYS = 200;
+    public static final int MINIMUM_DAYS = 100;
     private List<Entrant> entrants;
     private List<TownGeneration> generations;
-    private int currentGenerationIndex;
 
     private Tournament(List<Entrant> entrants, List<TownGeneration> generations) {
         this.entrants = entrants;
         this.generations = generations;
-        this.currentGenerationIndex = 0;
     }
 
+    public static TournamentBuilder builder() {
+        return new TournamentBuilder();
+    }
 
     @Override
     public boolean equals(Object atheO) {
         if (this == atheO) return true;
         if (atheO == null || getClass() != atheO.getClass()) return false;
         Tournament athat = (Tournament) atheO;
-        return currentGenerationIndex == athat.currentGenerationIndex &&
-                Objects.equals(entrants, athat.entrants) &&
+        return Objects.equals(entrants, athat.entrants) &&
                 Objects.equals(generations, athat.generations);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(entrants, generations, currentGenerationIndex);
+        return Objects.hash(entrants, generations);
     }
 
     @Override
@@ -45,12 +46,8 @@ public class Tournament {
         return "Tournament{" +
                 "entrants=" + entrants +
                 ", generations=" + generations +
-                ", currentGenerationIndex=" + currentGenerationIndex +
+                ", currentGenerationIndex=" +
                 '}';
-    }
-
-    public static TournamentBuilder builder() {
-        return new TournamentBuilder();
     }
 
     public List<Entrant> listScoredEntrants() {
@@ -60,8 +57,8 @@ public class Tournament {
                 .collect(Collectors.toList());
     }
 
-    public TownGeneration getCurrentGeneration() {
-        return generations.get(currentGenerationIndex);
+    public List<TownGeneration> getGenerations() {
+        return Collections.unmodifiableList(generations);
     }
 
     public static class TournamentBuilder {
@@ -93,8 +90,8 @@ public class Tournament {
                                     .map(entrants::get).collect(Collectors.toList()))
                     .map(generationEntrants ->
                             TownGeneration.builder()
-                                    .minimumPatients(MINIMUM_PATIENTS)
-                                    .maximumPatients(MAXIMUM_PATIENTS)
+                                    .minimumDays(MINIMUM_DAYS)
+                                    .maximumDays(MAXIMUM_DAYS)
                                     .entrants(generationEntrants)
                                     .build())
                     .collect(Collectors.toList());

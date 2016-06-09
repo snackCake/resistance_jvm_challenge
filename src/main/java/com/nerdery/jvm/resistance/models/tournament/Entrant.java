@@ -1,4 +1,4 @@
-package com.nerdery.jvm.resistance.tournament;
+package com.nerdery.jvm.resistance.models.tournament;
 
 import com.nerdery.jvm.resistance.bots.DoctorBot;
 import org.reflections.Reflections;
@@ -31,7 +31,7 @@ public class Entrant {
     }
 
     public int getExtinctionsCaused() {
-        return (int) results.stream().filter(EntrantGenerationResult::isTriggeredExtinction).count();
+        return (int) results.stream().filter(EntrantGenerationResult::isZombieApocalypseTriggered).count();
     }
 
     public void addGenerationResult(EntrantGenerationResult result) {
