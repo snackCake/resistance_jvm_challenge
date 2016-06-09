@@ -22,7 +22,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
   * Cons: Other doctors are illogical, and sometimes this bot is just unlucky. But those things don't matter,
   * it was going to get sued anyways for violating HIPAA.
   *
-  * @author Stephen Hopper
+  * Note: Twitter functionality assumes there's a twitter4j.properties file on the root of the classpath.
+  *
+  * @author Stephen Hopper (stephenmhopper@gmail.com)
   */
 class HopperBayesianBot(tweetMuch: Boolean = true) extends DoctorBot {
   import HopperBayesianBot._
