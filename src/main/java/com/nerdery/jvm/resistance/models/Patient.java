@@ -79,9 +79,25 @@ public class Patient {
         private void randomizePatientParameters() {
             if (randomizeNeeded) {
                 patientTemperature = minTemperature + (maxTemperature - minTemperature) * randomGenerator.nextFloat();
-                bacterialInfection = randomGenerator.nextBoolean();
+                bacterialInfection = decidePatientBacterial();
                 randomizeNeeded = false;
             }
+        }
+
+        private boolean decidePatientBacterial() {
+            float infectionChance;
+            if (patientTemperature < 100.0f) {
+                infectionChance = 0.0f;
+            } else if (patientTemperature < 101.0f) {
+                infectionChance = 0.25f;
+            } else if (patientTemperature < 102.0f) {
+                infectionChance = 0.5f;
+            } else if (patientTemperature < 103.0f) {
+                infectionChance = 0.75f;
+            } else {
+                infectionChance = 1.0f;
+            }
+            return randomGenerator.nextFloat() < infectionChance;
         }
 
         public PatientBuilder maxTemperature(float maxTemperature) {
