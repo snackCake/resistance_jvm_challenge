@@ -1,5 +1,8 @@
 package com.nerdery.jvm.resistance.test
 
+import com.nerdery.jvm.resistance.models.Outcome
+import com.nerdery.jvm.resistance.models.Patient
+import com.nerdery.jvm.resistance.models.Prescription
 import com.nerdery.jvm.resistance.services.MicrobialSimulationService
 import spock.lang.Specification
 
@@ -41,5 +44,58 @@ class MicrobialSimulationServiceSpec extends Specification {
         def luck = service.hasGoodLuck(temp);
         println("temp: ${temp} luck: ${luck}")
         true
+    }
+
+    def "Patients with clear-cut cases should get correct outcomes"() {
+        given:
+        def service = new MicrobialSimulationService()
+
+        when:
+        def patients = [new Patient(99.5f, false), new Patient(103.5f, true)]
+        def prescriptions = [new Prescription("test", false, 99.5f), new Prescription("test", true, 103.5f)]
+
+        then: "Correct diagnoses get the correct outcomes"
+        println(patients)
+        println(prescriptions)
+        def outcomes = service.divineOutcomes(patients, prescriptions)
+        outcomes[0].outcome == Outcome.VIRAL_REST && outcomes[1].outcome == Outcome.BACTERIAL_ANTIBIOTICS
+    }
+
+    def "Patients with wrong bacterial diagnoses should get acceptable outcomes"() {
+        given:
+        def service = new MicrobialSimulationService()
+
+        when:
+        def patients = [new Patient(102.5f, true)]
+        def prescriptions = [new Prescription("test", false, 99.5f)]
+
+        then: "Incorrect diagnoses get the correct outcomes"
+        println(patients)
+        println(prescriptions)
+        def outcomes = service.divineOutcomes(patients, prescriptions)
+        println(outcomes)
+        outcomes[0].outcome == Outcome.LUCKY_BACTERIAL_REST || outcomes[0].outcome == Outcome.UNLUCKY_BACTERIAL_REST
+    }
+
+    def "Everybody prescribing antibiotics incorrectly triggers the zombie apocalypse"() {
+        given:
+        def service = new MicrobialSimulationService()
+
+        when:
+        def patients = [new Patient(101.5f, false),
+                        new Patient(101.5f, false),
+                        new Patient(101.5f, false),
+                        new Patient(101.5f, false)]
+        def prescriptions = [new Prescription("test", true, 101.5f),
+                             new Prescription("test", true, 101.5f),
+                             new Prescription("test", true, 101.5f),
+                             new Prescription("test", true, 101.5f)]
+
+        then: "#temp is unlucky"
+        println(patients)
+        println(prescriptions)
+        def outcomes = service.divineOutcomes(patients, prescriptions)
+        outcomes[0].outcome == Outcome.UNLUCKY_VIRAL_ANTIBIOTICS && outcomes[1].outcome == Outcome.UNLUCKY_VIRAL_ANTIBIOTICS &&
+                outcomes[2].outcome == Outcome.UNLUCKY_VIRAL_ANTIBIOTICS && outcomes[3].outcome == Outcome.UNLUCKY_VIRAL_ANTIBIOTICS
     }
 }
