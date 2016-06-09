@@ -1,4 +1,4 @@
-package com.nerdery.jvm.resistance.bots.implementation;
+package com.nerdery.jvm.resistance.bots.entrants.myoung;
 
 import com.nerdery.jvm.resistance.bots.DoctorBot;
 import com.nerdery.jvm.resistance.models.Prescription;
