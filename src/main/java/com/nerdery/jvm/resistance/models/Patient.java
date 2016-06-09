@@ -9,6 +9,8 @@ import java.util.Random;
  */
 public class Patient {
 
+    public static final float NO_INFECTION_TEMPERATURE = 100.0f;
+    public static final float GUARANTEED_INFECTION_TEMPERATURE = 103.0f;
     private float temperature;
     private boolean bacterialInfection;
 
@@ -86,13 +88,13 @@ public class Patient {
 
         private boolean decidePatientBacterial() {
             float infectionChance;
-            if (patientTemperature < 100.0f) {
+            if (patientTemperature < NO_INFECTION_TEMPERATURE) {
                 infectionChance = 0.0f;
             } else if (patientTemperature < 101.0f) {
                 infectionChance = 0.25f;
             } else if (patientTemperature < 102.0f) {
                 infectionChance = 0.5f;
-            } else if (patientTemperature < 103.0f) {
+            } else if (patientTemperature < GUARANTEED_INFECTION_TEMPERATURE) {
                 infectionChance = 0.75f;
             } else {
                 infectionChance = 1.0f;
