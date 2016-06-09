@@ -28,6 +28,11 @@ class HopperBayesianBot(tweetMuch: Boolean = true) extends DoctorBot {
   import HopperBayesianBot._
   private val prescriptionMap = mutable.Map[String, ListBuffer[PrescriptionData]]()
 
+  //Default constructor. Disables Twitter functionality.
+  def this() {
+    this(false)
+  }
+
   override def getUserId: String = "hopper"
 
   override def prescribeAntibiotic(patientTemperature: Float, previousPrescriptions: util.Collection[Prescription]) = {
