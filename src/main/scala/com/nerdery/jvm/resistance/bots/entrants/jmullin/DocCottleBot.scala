@@ -1,4 +1,4 @@
-package resistance.bots.entrants.jmullin
+package com.nerdery.jvm.resistance.bots.entrants.jmullin
 
 import java.util
 
