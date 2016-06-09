@@ -79,7 +79,7 @@ public class TownDay {
         private List<Patient> buildPatients(int patientCount) {
             Patient.PatientBuilder patientBuilder = Patient.builder();
             patientBuilder.randomizeNeeded(true);
-            return IntStream.of(patientCount)
+            return IntStream.range(0, patientCount)
                     .mapToObj(i -> patientBuilder.build())
                     .collect(Collectors.toList());
         }
