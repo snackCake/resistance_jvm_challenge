@@ -67,7 +67,7 @@ class MicrobialSimulationServiceSpec extends Specification {
 
         when:
         def patients = [new Patient(102.5f, true)]
-        def prescriptions = [new Prescription("test", false, 99.5f)]
+        def prescriptions = [new Prescription("test", false, 102.5f)]
 
         then: "Incorrect diagnoses get the correct outcomes"
         println(patients)
@@ -75,6 +75,28 @@ class MicrobialSimulationServiceSpec extends Specification {
         def outcomes = service.divineOutcomes(patients, prescriptions)
         println(outcomes)
         outcomes[0].outcome == Outcome.LUCKY_BACTERIAL_REST || outcomes[0].outcome == Outcome.UNLUCKY_BACTERIAL_REST
+    }
+
+    def "Patients with wrong bacterial diagnoses should get the same outcomes, because luck is in the air"() {
+        given:
+        def service = new MicrobialSimulationService()
+
+        when:
+        def patients = [new Patient(102.5f, true), new Patient(102.5f, true), new Patient(102.5f, true), new Patient(102.5f, true),
+                        new Patient(102.5f, true), new Patient(102.5f, true), new Patient(102.5f, true), new Patient(102.5f, true)]
+        def prescriptions = [new Prescription("test", false, 102.5f), new Prescription("test", false, 102.5f),
+                             new Prescription("test", false, 102.5f), new Prescription("test", false, 102.5f),
+                             new Prescription("test", false, 102.5f), new Prescription("test", false, 102.5f),
+                             new Prescription("test", false, 102.5f), new Prescription("test", false, 102.5f)]
+
+        then: "Incorrect diagnoses get the correct outcomes"
+        println(patients)
+        println(prescriptions)
+        def outcomes = service.divineOutcomes(patients, prescriptions)
+        println(outcomes)
+        def identicalLuck = true
+        outcomes.forEach { patientOutcome -> identicalLuck = identicalLuck && patientOutcome.outcome == outcomes[0].outcome}
+        identicalLuck
     }
 
     def "Everybody prescribing antibiotics incorrectly triggers the zombie apocalypse"() {

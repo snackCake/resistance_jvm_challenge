@@ -17,12 +17,15 @@ import java.util.stream.IntStream;
 public class MicrobialSimulationService {
 
     private Random randomGenerator;
+    private double dailyLuck;
+
 
     public MicrobialSimulationService() {
         randomGenerator = new SecureRandom();
     }
 
     public List<PatientOutcome> divineOutcomes(List<Patient> patients, List<Prescription> prescriptions) {
+        dailyLuck = randomGenerator.nextDouble();
         return IntStream.range(0, patients.size()).mapToObj(i -> {
             Patient patient = patients.get(i);
             Prescription prescription = prescriptions.get(i);
@@ -58,7 +61,6 @@ public class MicrobialSimulationService {
     private boolean hasGoodLuck(float temperature) {
         float infectionSpan = Patient.GUARANTEED_INFECTION_TEMPERATURE - Patient.NO_INFECTION_TEMPERATURE;
         double temperatureLuckThreshold = Math.pow(((double)(temperature - Patient.NO_INFECTION_TEMPERATURE) / infectionSpan), 5.0);
-        double luck = randomGenerator.nextDouble();
-        return luck > temperatureLuckThreshold;
+        return dailyLuck > temperatureLuckThreshold;
     }
 }
