@@ -1,4 +1,4 @@
-package com.nerdery.jvm.resistance.bots.hopper;
+package com.nerdery.jvm.resistance.bots.entrants.hopper;
 
 import com.nerdery.jvm.resistance.models.Prescription;
 import org.junit.Test;

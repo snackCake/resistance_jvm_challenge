@@ -14,10 +14,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * The Hopper bot. Uses conditional probabilities.
+ * The Hopper bot. Uses conditional probabilities. Also violates
+ * HIPAA by Tweeting about patients its seeing.
  *
- * Pros: Tries to use probabilities of outcomes when making decisions.
- * Cons: Other doctors are illogical, and sometimes this bot is just unlucky.
+ * Pros: Tries to use probabilities of outcomes when making decisions. Is a social butterfly knife.
+ * Cons: Other doctors are illogical, and sometimes this bot is just unlucky. But those things don't matter,
+ * he was going to get sued anyways for violating HIPAA.
  *
  * @author Stephen Hopper
  */
