@@ -86,7 +86,7 @@ public class HopperBayesianBotTest {
 
     @Test
     public void test_75_RangeTemp() {
-        assertTrue(bot.prescribeAntibiotic(P75, emptyPrescriptions));
+        assertFalse(bot.prescribeAntibiotic(P75, emptyPrescriptions));
     }
 
     @Test
@@ -111,7 +111,7 @@ public class HopperBayesianBotTest {
 
     @Test
     public void test_75_RangeTemp_EverybodyEvil() {
-        assertTrue(bot.prescribeAntibiotic(P75, evilPrescriptions));
+        assertFalse(bot.prescribeAntibiotic(P75, evilPrescriptions));
     }
 
     @Test
@@ -131,7 +131,7 @@ public class HopperBayesianBotTest {
 
     @Test
     public void test_50_RangeTemp_EverybodyMostlyEvil() {
-        assertTrue(bot.prescribeAntibiotic(P50, mostlyEvilLargeScalePrescriptions));
+        assertFalse(bot.prescribeAntibiotic(P50, mostlyEvilLargeScalePrescriptions));
     }
 
     @Test

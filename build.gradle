@@ -18,6 +18,7 @@ dependencies {
     compile 'org.twitter4j:twitter4j-core:4.0.4'
     compile 'org.twitter4j:twitter4j-async:4.0.4'
     compile "org.codehaus.groovy:groovy-all:2.4.1"
+    compile 'com.typesafe.akka:akka-actor_2.11:2.4.7'
     testCompile 'junit:junit:4.11'
     testCompile "org.spockframework:spock-core:1.0-groovy-2.4"
     testRuntime "cglib:cglib-nodep:3.1"

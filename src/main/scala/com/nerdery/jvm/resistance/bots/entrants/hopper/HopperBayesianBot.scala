@@ -1,8 +1,9 @@
 package com.nerdery.jvm.resistance.bots.entrants.hopper
 
-import java.security.SecureRandom
 import java.util
+import akka.actor._
 
+import akka.actor.{Actor, ActorLogging, ActorSystem, Props}
 import com.nerdery.jvm.resistance.bots.DoctorBot
 import com.nerdery.jvm.resistance.models.Prescription
 import twitter4j.{StatusUpdate, TwitterFactory}
@@ -39,19 +40,14 @@ class HopperBayesianBot(tweetMuch: Boolean = true) extends DoctorBot {
     println(s"Probability of money if prescribe antibiotic: $probMoneyIfPrescribeAntibiotic")
     println(s"Probability of money if prescribe rest: $probMoneyIfPrescribeRest")
 
-    /*val prescribeAntibioticMoneyFactor = probMoneyIfPrescribeAntibiotic * (MONEY_ANTIBIOTIC_BAD + MONEY_ANTIBIOTIC_GOOD)
-    val prescribeRestMoneyFactor = probMoneyIfPrescribeRest * (MONEY_REST_BAD + MONEY_REST_GOOD)
-    println(s"Prescribe antibiotic money factor: $prescribeAntibioticMoneyFactor")
-    println(s"Prescribe rest money factor: $prescribeRestMoneyFactor")
-    val prescribeDrugs = prescribeAntibioticMoneyFactor >= prescribeRestMoneyFactor*/
-    val prescribeDrugs = probMoneyIfPrescribeAntibiotic > probMoneyIfPrescribeRest
+    //do the comparison. If it's within 5%, then we'll just go with antibiotics 'cause we get moar $$$
+    val prescribeDrugs = probMoneyIfPrescribeAntibiotic > (probMoneyIfPrescribeRest - 0.05f)
     println(s"Prescribe antibiotics?: $prescribeDrugs")
 
     val status: StatusUpdate = buildStatus(patientTemperature, prescribeDrugs, probMoneyIfPrescribeAntibiotic, probMoneyIfPrescribeRest)
-
     if (tweetMuch) {
       try {
-        twitter.updateStatus(status)
+        twitterActor ! status
       } catch {
         case t: Throwable =>
           println(s"Something went wrong whilst tweeting: $t")
@@ -122,9 +118,7 @@ class HopperBayesianBot(tweetMuch: Boolean = true) extends DoctorBot {
 
   private def probLuckyGivenRest(temp: PatientTemp): Float = 1.0f - probUnluckyGivenRest(temp)
 
-  private def probUnluckyGivenRest(temp: PatientTemp): Float = probInfected(temp) * Math.min(1.0f, randy + 0.5f)
-
-  private def randy: Float = new SecureRandom().nextFloat
+  private def probUnluckyGivenRest(temp: PatientTemp): Float = math.pow((temp.temperature - 100.0) / 3.0, 5.0).toFloat / 2.0f
 
   private def probInfected(temp: PatientTemp): Float = temp.getProbInfected
 }
@@ -136,9 +130,15 @@ object HopperBayesianBot {
   private val WEIGHT_SIMILAR_PRESCRIPTION_PROB: Float = 0.9f
   private val WEIGHT_OVERALL_PRESCRIPTION_PROB: Float = 1 - WEIGHT_SIMILAR_PRESCRIPTION_PROB
 
-  private lazy val twitter = TwitterFactory.getSingleton
-  /*private val MONEY_ANTIBIOTIC_GOOD: Int = 3
-  private val MONEY_ANTIBIOTIC_BAD: Int = -100
-  private val MONEY_REST_GOOD: Int = 1
-  private val MONEY_REST_BAD: Int = -10*/
+  //sure, we could just use futures, but why not over-engineer and just use Akka?
+  private lazy val system = ActorSystem("HopperBayes")
+  private lazy val twitterActor = system.actorOf(Props(classOf[TweetMuch]), "tweet-much")
+
+  class TweetMuch extends Actor with ActorLogging {
+    def receive = {
+      case status: StatusUpdate =>
+        log.info("Sending status update to twitter")
+        TwitterFactory.getSingleton.updateStatus(status)
+    }
+  }
 }
