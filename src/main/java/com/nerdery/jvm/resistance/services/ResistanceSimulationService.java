@@ -73,28 +73,36 @@ public class ResistanceSimulationService {
     }
 
     private List<Map<Entrant, PatientOutcome>> runGeneration(TownGeneration generation) {
-        final Collection<Prescription> previousDay = new ArrayList<>(generation.getEntrants().size());
+        final List<PatientOutcome> previousDay = new ArrayList<>(generation.getEntrants().size());
         return generation.getDays()
                 .stream()
-                .map(day -> {
-                    List<Prescription> prescriptions = runDay(day, previousDay);
-                    previousDay.clear();
-                    previousDay.addAll(prescriptions);
-                    List<PatientOutcome> outcomes = microbialSimulation.divineOutcomes(day.getPatients(), prescriptions);
-                    Map<Entrant, PatientOutcome> entrantOutcomes = new HashMap<>();
-                    IntStream.range(0, outcomes.size())
-                            .forEach(i -> entrantOutcomes.put(day.getDoctors().get(i), outcomes.get(i)));
-                    return entrantOutcomes;
-                }).collect(Collectors.toList());
+                .map(day -> runAndScoreDay(previousDay, day))
+                .collect(Collectors.toList());
     }
 
-    private List<Prescription> runDay(TownDay day, Collection<Prescription> previousDay) {
+    private Map<Entrant, PatientOutcome> runAndScoreDay(List<PatientOutcome> previousDay, TownDay day) {
+        if (previousDay.size() > 0 && previousDay.get(0).getOutcome() == Outcome.UNLUCKY_VIRAL_ANTIBIOTICS) {
+            return Collections.emptyMap();
+        }
+
+        List<Prescription> prescriptions = runDay(day, previousDay);
+        List<PatientOutcome> outcomes = microbialSimulation.divineOutcomes(day.getPatients(), prescriptions);
+        previousDay.clear();
+        previousDay.addAll(outcomes);
+
+        Map<Entrant, PatientOutcome> entrantOutcomes = new HashMap<>();
+        IntStream.range(0, outcomes.size())
+                .forEach(i -> entrantOutcomes.put(day.getDoctors().get(i), outcomes.get(i)));
+        return entrantOutcomes;
+    }
+
+    private List<Prescription> runDay(TownDay day, Collection<PatientOutcome> previousDay) {
         return IntStream.range(0, day.getDoctors().size())
                 .parallel()
                 .mapToObj(i -> {
                     Patient patient = day.getPatients().get(i);
                     DoctorBot doctor = day.getDoctors().get(i).getDoctorBot();
-                    boolean antibiotics = doctor.prescribeAntibiotic(patient.getTemperature(), previousDay);
+                    boolean antibiotics = doctor.prescribeAntibioticHipaaDubious(patient.getTemperature(), previousDay);
                     return new Prescription(doctor.getUserId(), antibiotics, patient.getTemperature());
                 }).collect(Collectors.toList());
     }

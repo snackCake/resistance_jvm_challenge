@@ -30,7 +30,7 @@ public class MicrobialSimulationService {
             Patient patient = patients.get(i);
             Prescription prescription = prescriptions.get(i);
             Outcome outcome = decideOutcome(prescriptions, patient, prescription);
-            return new PatientOutcome(patient, outcome);
+            return new PatientOutcome(patient, prescription, outcome);
         }).collect(Collectors.toList());
     }
 
