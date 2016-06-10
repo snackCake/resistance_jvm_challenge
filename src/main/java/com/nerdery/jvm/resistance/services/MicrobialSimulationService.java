@@ -34,17 +34,17 @@ public class MicrobialSimulationService {
         }).collect(Collectors.toList());
     }
 
-    private Outcome decideOutcome(List<Prescription> prescriptions, Patient thePatient, Prescription thePrescription) {
+    private Outcome decideOutcome(List<Prescription> prescriptions, Patient patient, Prescription prescription) {
         Outcome outcome;
-        if (!thePrescription.isPrescribedAntibiotics() && !thePatient.isBacterialInfection()) {
+        if (!prescription.isPrescribedAntibiotics() && !patient.isBacterialInfection()) {
             outcome = Outcome.VIRAL_REST;
-        } else if (!thePrescription.isPrescribedAntibiotics() && thePatient.isBacterialInfection()) {
-            if (hasGoodLuck(thePatient.getTemperature())) {
+        } else if (!prescription.isPrescribedAntibiotics() && patient.isBacterialInfection()) {
+            if (hasGoodLuck(patient.getTemperature())) {
                 outcome = Outcome.LUCKY_BACTERIAL_REST;
             } else {
                 outcome = Outcome.UNLUCKY_BACTERIAL_REST;
             }
-        } else if (thePrescription.isPrescribedAntibiotics() && thePatient.isBacterialInfection()) {
+        } else if (prescription.isPrescribedAntibiotics() && patient.isBacterialInfection()) {
             outcome = Outcome.BACTERIAL_ANTIBIOTICS;
         } else /* if (prescription.isPrescribedAntibiotics() && !patient.isBacterialInfection())*/ {
             if (prescriptions.stream()
@@ -55,6 +55,7 @@ public class MicrobialSimulationService {
                 outcome = Outcome.UNLUCKY_VIRAL_ANTIBIOTICS;
             }
         }
+        System.err.println("Patient [" + patient + "] got outcome: " + outcome);
         return outcome;
     }
 

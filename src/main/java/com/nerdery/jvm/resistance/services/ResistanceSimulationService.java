@@ -73,6 +73,7 @@ public class ResistanceSimulationService {
     }
 
     private List<Map<Entrant, PatientOutcome>> runGeneration(TownGeneration generation) {
+        System.err.println("Running generation: " + generation);
         final List<PatientOutcome> previousDay = new ArrayList<>(generation.getEntrants().size());
         return generation.getDays()
                 .stream()
@@ -82,17 +83,20 @@ public class ResistanceSimulationService {
 
     private Map<Entrant, PatientOutcome> runAndScoreDay(List<PatientOutcome> previousDay, TownDay day) {
         if (previousDay.size() > 0 && previousDay.get(0).getOutcome() == Outcome.UNLUCKY_VIRAL_ANTIBIOTICS) {
+            System.err.println("Not running day, because the town has been wiped out: " + day);
             return Collections.emptyMap();
         }
 
+        System.err.println("Running day: " + day);
         List<Prescription> prescriptions = runDay(day, previousDay);
+
         List<PatientOutcome> outcomes = microbialSimulation.divineOutcomes(day.getPatients(), prescriptions);
+        System.err.println("On day #" + day.getDayNumber() + " patients had the following outcomes: " + outcomes);
         previousDay.clear();
         previousDay.addAll(outcomes);
 
         Map<Entrant, PatientOutcome> entrantOutcomes = new HashMap<>();
-        IntStream.range(0, outcomes.size())
-                .forEach(i -> entrantOutcomes.put(day.getDoctors().get(i), outcomes.get(i)));
+        IntStream.range(0, outcomes.size()).forEach(i -> entrantOutcomes.put(day.getDoctors().get(i), outcomes.get(i)));
         return entrantOutcomes;
     }
 
