@@ -53,7 +53,7 @@ public class Tournament {
     public List<Entrant> listScoredEntrants() {
         return entrants
                 .stream()
-                .sorted((entrant1, entrant2) -> ((Integer) entrant1.getScore()).compareTo(entrant2.getScore()))
+                .sorted((entrant1, entrant2) -> ((Integer) entrant2.getScore()).compareTo(entrant1.getScore()))
                 .collect(Collectors.toList());
     }
 

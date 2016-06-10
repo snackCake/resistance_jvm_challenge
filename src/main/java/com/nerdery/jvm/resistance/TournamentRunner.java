@@ -1,8 +1,13 @@
 package com.nerdery.jvm.resistance;
 
+import com.nerdery.jvm.resistance.bots.DoctorBot;
+import com.nerdery.jvm.resistance.models.tournament.Entrant;
 import com.nerdery.jvm.resistance.models.tournament.Tournament;
 import com.nerdery.jvm.resistance.services.MicrobialSimulationService;
 import com.nerdery.jvm.resistance.services.ResistanceSimulationService;
+
+import java.util.List;
+import java.util.stream.IntStream;
 
 /**
  * @author Josh Klun (jklun@nerdery.com)
@@ -20,5 +25,18 @@ public class TournamentRunner {
         MicrobialSimulationService microbialService = new MicrobialSimulationService();
         ResistanceSimulationService simulationService = new ResistanceSimulationService(microbialService);
         simulationService.runTournament(tournament);
+        printReport(tournament);
+    }
+
+    private static void printReport(Tournament tournament) {
+        List<Entrant> entrants = tournament.listScoredEntrants();
+        System.out.println("Resistance Tournament Results");
+        IntStream.range(0, entrants.size()).forEach(i -> {
+            Entrant entrant = entrants.get(i);
+            DoctorBot doctorBot = entrant.getDoctorBot();
+            System.out.println((i + 1) + ". " + doctorBot.getUserId() + " - " + doctorBot.getClass().getSimpleName() + ": $" + entrant.getScore());
+        });
+        tournament.listScoredEntrants()
+                .stream().forEach(entrant -> System.out.println(""));
     }
 }

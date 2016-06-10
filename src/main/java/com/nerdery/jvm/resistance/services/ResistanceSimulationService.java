@@ -27,7 +27,7 @@ public class ResistanceSimulationService {
                 .stream()
                 .map(this::runGeneration)
                 .forEach(this::updateEntrantsWithResults);
-        System.out.println(tournament.listScoredEntrants());
+        System.err.println(tournament.listScoredEntrants());
     }
 
     private void updateEntrantsWithResults(List<Map<Entrant, PatientOutcome>> generationPatientOutcomes) {
