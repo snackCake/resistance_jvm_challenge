@@ -1,8 +1,9 @@
 package com.nerdery.jvm.resistance.bots.entrants.hopper
 
+import java.security.SecureRandom
 import java.util
-import akka.actor._
 
+import akka.actor._
 import akka.actor.{Actor, ActorLogging, ActorSystem, Props}
 import com.nerdery.jvm.resistance.bots.DoctorBot
 import com.nerdery.jvm.resistance.models.Prescription
@@ -27,6 +28,7 @@ import scala.collection.mutable.ListBuffer
 class HopperBayesianBot(tweetMuch: Boolean = true) extends DoctorBot {
   import HopperBayesianBot._
   private val prescriptionMap = mutable.Map[String, ListBuffer[PrescriptionData]]()
+  private val randy = new SecureRandom()
 
   //Default constructor. Disables Twitter functionality.
   def this() {
@@ -50,9 +52,11 @@ class HopperBayesianBot(tweetMuch: Boolean = true) extends DoctorBot {
     println(s"Prescribe antibiotics?: $prescribeDrugs")
 
     val status: StatusUpdate = buildStatus(patientTemperature, prescribeDrugs, probMoneyIfPrescribeAntibiotic, probMoneyIfPrescribeRest)
+    val otherDocStatus = buildOtherDocStatusMaybe(previousPrescriptions.toList)
     if (tweetMuch) {
       try {
         twitterActor ! status
+        otherDocStatus.foreach(s => twitterActor ! s)
       } catch {
         case t: Throwable =>
           println(s"Something went wrong whilst tweeting: $t")
@@ -63,16 +67,40 @@ class HopperBayesianBot(tweetMuch: Boolean = true) extends DoctorBot {
     prescribeDrugs
   }
 
+  private def buildOtherDocStatusMaybe(previousPrescriptions: List[Prescription]): Option[StatusUpdate] = {
+    if (previousPrescriptions.nonEmpty) {
+      val otherDocs = previousPrescriptions.filter(_.getUserId != "hopper")
+      val otherDoc = otherDocs(randy.nextInt(otherDocs.size))
+      val handle = s"@${otherDoc.getUserId.substring(0,Math.min(49, otherDoc.getUserId.length))}"
+      val temp = PatientTemp(otherDoc.getTemperature)
+      val tempStr = s"${format(temp.temperature)}F"
+      val statusOpt: Option[String] = (PatientTemp(otherDoc.getTemperature), otherDoc.isPrescribedAntibiotics) match {
+        case (t, true) if t.getProbInfected <= 0.25 => Option(s"OMG ROFL $handle prescribed drugs to a patient with a temp of $tempStr $HASHTAG")
+        case (t, false) if t.getProbInfected <= 0.25 => Option(s"$handle prescribed rest to a patient with a temp of $tempStr. Such dull Much boring $HASHTAG")
+        case (t, false) if t.getProbInfected > 0.5 => Option(s"Lolz $handle prescribed rest to a patient with a temp of $tempStr $HASHTAG")
+        case _ => None
+      }
+      statusOpt.map { status =>
+        println(status)
+        val update = new StatusUpdate(status)
+        update.setPossiblySensitive(false) //hilarious
+        update
+      }
+    } else {
+      None
+    }
+  }
+
   private def buildStatus(temp: Float, prescribeDrugs: Boolean, chanceMoneyAnti: Float, chanceMoneyRest: Float): StatusUpdate = {
     val antiMoneyStr: String = format(chanceMoneyAnti * 100.0f)
     val restMoneyStr: String = format(chanceMoneyRest * 100.0f)
     val status: String = prescribeDrugs match {
-      case true => s"Prescribed drugs to a patient with a fever of ${format(temp)}F as there's a $antiMoneyStr% chance I get $$$$$$ from this (vs $restMoneyStr%) #NerderyResistance"
-      case false => s"Told some fool to rest up because their fever was ${format(temp)}F and there's a $restMoneyStr% chance I get $$$$$$ from this (vs $antiMoneyStr%) #NerderyResistance"
+      case true => s"Prescribed drugs to a patient with a fever of ${format(temp)}F as there's a $antiMoneyStr% chance I get $$$$$$ from this (vs $restMoneyStr%) $HASHTAG"
+      case false => s"Told some fool to rest up because their fever was ${format(temp)}F and there's a $restMoneyStr% chance I get $$$$$$ from this (vs $antiMoneyStr%) $HASHTAG"
     }
     println(status)
     val update: StatusUpdate = new StatusUpdate(status)
-    update.setPossiblySensitive(false)
+    update.setPossiblySensitive(false) //hilarious
     update
   }
 
@@ -134,6 +162,7 @@ object HopperBayesianBot {
   private val MIN_SIMILAR_PRESCRIPTION_PROB_CALC: Int = 5
   private val WEIGHT_SIMILAR_PRESCRIPTION_PROB: Float = 0.9f
   private val WEIGHT_OVERALL_PRESCRIPTION_PROB: Float = 1 - WEIGHT_SIMILAR_PRESCRIPTION_PROB
+  private val HASHTAG = "#NerderyResistance"
 
   //sure, we could just use futures, but why not over-engineer and just use Akka?
   private lazy val system = ActorSystem("HopperBayes")
