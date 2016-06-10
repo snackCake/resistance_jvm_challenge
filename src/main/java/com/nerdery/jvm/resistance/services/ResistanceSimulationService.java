@@ -1,16 +1,13 @@
 package com.nerdery.jvm.resistance.services;
 
 import com.nerdery.jvm.resistance.bots.DoctorBot;
+import com.nerdery.jvm.resistance.models.Outcome;
 import com.nerdery.jvm.resistance.models.Patient;
 import com.nerdery.jvm.resistance.models.PatientOutcome;
 import com.nerdery.jvm.resistance.models.Prescription;
-import com.nerdery.jvm.resistance.models.tournament.Tournament;
-import com.nerdery.jvm.resistance.models.tournament.TownDay;
-import com.nerdery.jvm.resistance.models.tournament.TownGeneration;
+import com.nerdery.jvm.resistance.models.tournament.*;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -28,10 +25,54 @@ public class ResistanceSimulationService {
     public void runTournament(Tournament tournament) {
         tournament.getGenerations()
                 .stream()
-                .forEach(this::runGeneration);
+                .map(this::runGeneration)
+                .forEach(this::updateEntrantsWithResults);
+        System.out.println(tournament.listScoredEntrants());
     }
 
-    private List<List<PatientOutcome>> runGeneration(TownGeneration generation) {
+    private void updateEntrantsWithResults(List<Map<Entrant, PatientOutcome>> generationPatientOutcomes) {
+        Map<Entrant, EntrantGenerationResult> entrantGenerationResults = new HashMap<>();
+        generationPatientOutcomes.get(0)
+                .keySet()
+                .stream()
+                .forEach(entrant -> entrantGenerationResults.put(entrant, new EntrantGenerationResult()));
+        generationPatientOutcomes.stream()
+                .forEach(dayPatientOutcomes ->
+                        dayPatientOutcomes.keySet()
+                                .stream()
+                                .forEach(entrant -> updateGenerationWithDay(entrantGenerationResults, dayPatientOutcomes, entrant)));
+        entrantGenerationResults.entrySet()
+                .stream()
+                .forEach(entrantPair -> entrantPair.getKey().addGenerationResult(entrantPair.getValue()));
+    }
+
+    private void updateGenerationWithDay(Map<Entrant, EntrantGenerationResult> entrantGenerationResults,
+                                         Map<Entrant, PatientOutcome> dayPatientOutcomes,
+                                         Entrant entrant) {
+        Outcome outcome = dayPatientOutcomes.get(entrant).getOutcome();
+        EntrantGenerationResult result = entrantGenerationResults.get(entrant);
+        result.addScore(outcome.getInsurancePayment()).addPatientsTreated(1);
+        switch (outcome) {
+            case VIRAL_REST:
+                result.addViralCures(1);
+                break;
+            case LUCKY_BACTERIAL_REST:
+                break;
+            case UNLUCKY_BACTERIAL_REST:
+                result.addMalpracticeSuits(1);
+                break;
+            case BACTERIAL_ANTIBIOTICS:
+                result.addBacterialCures(1);
+                break;
+            case LUCKY_VIRAL_ANTIBIOTICS:
+                break;
+            case UNLUCKY_VIRAL_ANTIBIOTICS:
+                result.zombieApocalypseTriggered(true);
+                break;
+        }
+    }
+
+    private List<Map<Entrant, PatientOutcome>> runGeneration(TownGeneration generation) {
         final Collection<Prescription> previousDay = new ArrayList<>(generation.getEntrants().size());
         return generation.getDays()
                 .stream()
@@ -39,7 +80,11 @@ public class ResistanceSimulationService {
                     List<Prescription> prescriptions = runDay(day, previousDay);
                     previousDay.clear();
                     previousDay.addAll(prescriptions);
-                    return microbialSimulation.divineOutcomes(day.getPatients(), prescriptions);
+                    List<PatientOutcome> outcomes = microbialSimulation.divineOutcomes(day.getPatients(), prescriptions);
+                    Map<Entrant, PatientOutcome> entrantOutcomes = new HashMap<>();
+                    IntStream.range(0, outcomes.size())
+                            .forEach(i -> entrantOutcomes.put(day.getDoctors().get(i), outcomes.get(i)));
+                    return entrantOutcomes;
                 }).collect(Collectors.toList());
     }
 
