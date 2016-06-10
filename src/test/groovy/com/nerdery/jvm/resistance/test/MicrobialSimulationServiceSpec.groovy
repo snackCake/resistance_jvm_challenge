@@ -17,7 +17,6 @@ class MicrobialSimulationServiceSpec extends Specification {
         when:
         def temp = 99.0f
 
-
         then: "#temp is lucky"
         service.hasGoodLuck(temp)
     }
