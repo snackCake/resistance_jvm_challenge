@@ -1,6 +1,7 @@
 apply plugin: 'java'
 apply plugin: 'groovy'
 apply plugin: 'scala'
+apply plugin: 'application'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -22,3 +23,5 @@ dependencies {
     testRuntime "cglib:cglib-nodep:3.1"
     testRuntime "org.objenesis:objenesis:2.1"
 }
+
+mainClassName = "com.nerdery.jvm.resistance.TournamentRunner"
