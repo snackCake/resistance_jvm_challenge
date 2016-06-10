@@ -12,11 +12,11 @@ class TournamentBuilderSpec extends Specification {
     def "Built tournament will have the correct number of generations"() {
         given:
         def builder = Tournament.builder()
-        def correctEntrantCount = 7
+        def correctEntrantCount = 9
 
         when: "The entrant count is at the assumed #correctEntrantCount"
         def tournament = builder.entrantPackage(TournamentRunner.TEST_ENTRANT_PACKAGE).build()
-        def correctGenerationCount = 35
+        def correctGenerationCount = 126
 
         then: "There will be #correctGenerationCount generations, to allow for all combinations"
         println(tournament)
