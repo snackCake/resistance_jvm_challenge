@@ -18,7 +18,24 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/*
+* Antibiotic prescription Dr. council criteria
+*   *This trial consists of 7 Drs. When a patient comes in, each Dr. will give their decision as to
+*   prescribing antibiotics. Majority wins.
+*
+* Royals
+* Moon phases
+* Trump trending
+* Star Wars character height
+* Previous prescriptions
+* Patient temp
+* Weather conditions
+*
+* */
 public class ThatDrugTrial implements DoctorBot {
+
+    private int antibiotics = 0;
+    private int rest = 0;
 
     @Override
     public String getUserId() {
@@ -32,71 +49,91 @@ public class ThatDrugTrial implements DoctorBot {
                 .collect(Collectors.toList());
 
         // If the Royals are losing, we need drugs
-        TeamStandings royals = howAreTheRoyalsDoing();
-        if (royals != null && royals.getStreakType().equals("loss")){
-            return true;
-        }
+        drHowAreTheRoyalsDoing();
         // If there's a full moon, prescribe anitbiotics to prevent werewolfing (proven to work in 10th century)
-        PhaseData phaseData = moonPhases();
-        if (phaseData != null && phaseData.getPhase().equals("Full Moon")){
-            return true;
-        }
-        // Assuming antibiotics are manufactured overseas, if Trump is trending we assume he's shutting down drug shipments.  Aint no one getting antibiotics
-        String trends = googleTrends();
-        if (trends.toLowerCase().contains("trump")) {
-            return false;
-        }
+        drMoonPhases();
+        // Assuming antibiotics are manufactured overseas, if Trump is trending we assume he's shutting down drug shipments.  Ain't no one getting antibiotics
+        drGoogleTrends();
+        // Randomly retrieve a Star Wars character.  If the person has Little Man's syndrome we should probably give him antibiotics
+        drStarWarsPeople();
+        // If weather is NOT clear in KC, we're feeling "under the weather".  Give them drugs.
+        drCurrentWeather();
         // If people are using too much, ahhh lets do it anyways
-        if (antiBioticPrescriptions.size() >= 2) {
-            return true;
-        }
+        drPastHistoryOfOtherDrs(antiBioticPrescriptions);
         // Just makes sense
-        if (patientTemperature >= 102f) {
+        drPatientTemp(patientTemperature);
+
+        if (antibiotics >= rest){
             return true;
-        } else { //default to no antibiotics to prevent super strain
+        } else {
             return false;
         }
     }
 
-    private TeamStandings howAreTheRoyalsDoing(){
+    private void drPatientTemp(float patientTemperature){
+        if (patientTemperature >= 102f) {
+            antibiotics ++;
+        } else {
+            rest ++;
+        }
+    }
+
+    private void drPastHistoryOfOtherDrs(List antiBioticPrescriptions){
+        if (antiBioticPrescriptions.size() >= 2) {
+            antibiotics ++;
+        } else {
+            rest ++;
+        }
+    }
+
+    private void drHowAreTheRoyalsDoing(){
         DefaultHttpClient httpclient = new DefaultHttpClient();
         ObjectMapper objectMapper = new ObjectMapper();
-        List<TeamStandings> royals = null;
+        String streak;
 
         try {
             HttpGet getRequest = new HttpGet("https://erikberg.com/mlb/standings.json");
             HttpResponse httpResponse = httpclient.execute(getRequest);
             MlbStandings standings = objectMapper.readValue(httpResponse.getEntity().getContent(), MlbStandings.class);
-            royals = Arrays.stream(standings.getTeamStandings()).filter(t -> "kansas-city-royals".equals(t.getTeamId())).collect(Collectors.toList());
+            List<TeamStandings> royals = Arrays.stream(standings.getTeamStandings()).filter(t -> "kansas-city-royals".equals(t.getTeamId())).collect(Collectors.toList());
+            streak = royals.get(0).getStreakType();
         } catch (Exception e){//we'll probably hit api request limit, so just return null
-            return null;
+            streak = null;
         }
-        return royals.get(0);
+        if (streak != null && streak.equals("loss")){
+            antibiotics ++;
+        } else {
+            rest ++;
+        }
     }
 
-    private PhaseData moonPhases(){
+    private void drMoonPhases(){
         DefaultHttpClient httpclient = new DefaultHttpClient();
         ObjectMapper objectMapper = new ObjectMapper();
-        PhaseData phases = null;
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
         String uri = "http://api.usno.navy.mil/moon/phase?date=" + LocalDate.now().format(formatter) + "&nump=4";
+        String phaseData;
 
         try {
             HttpGet getRequest = new HttpGet(uri);
             HttpResponse httpResponse = httpclient.execute(getRequest);
             MoonPhases moonPhases = objectMapper.readValue(httpResponse.getEntity().getContent(), MoonPhases.class);
-            phases = moonPhases.getPhaseDatas()[0];
+            phaseData = moonPhases.getPhaseDatas()[0].getPhase();
         } catch (Exception e){
-            return null;
+            phaseData = null;
         }
-        return phases;
+        if (phaseData != null && phaseData.equals("Full Moon")){
+            antibiotics ++;
+        } else {
+            rest ++;
+        }
     }
 
-    private String googleTrends(){
+    private void drGoogleTrends(){
         DefaultHttpClient httpclient = new DefaultHttpClient();
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
-        String trends = null;
+        String trends;
 
         try {
             HttpGet getRequest = new HttpGet("https://ajax.googleapis.com/ajax/services/feed/load?v=1.0&q=http%3A%2F%2Fwww.google.com%2Ftrends%2Fhottrends%2Fatom%2Fhourly");
@@ -104,9 +141,55 @@ public class ThatDrugTrial implements DoctorBot {
             GoogleTrends googleTrends = objectMapper.readValue(httpResponse.getEntity().getContent(), GoogleTrends.class);
             trends = googleTrends.getGoogleResponse().getGoogleFeed().getEntries()[0].getContent();
         } catch (Exception e){
-            return null;
+            trends = null;
         }
-        return trends;
+        if (trends != null && !trends.toLowerCase().contains("trump")) {
+            antibiotics ++;
+        } else {
+            rest ++;
+        }
+    }
+
+    private void drStarWarsPeople(){
+        int randomNum = 1 + (int)(Math.random() * 87);
+        DefaultHttpClient httpclient = new DefaultHttpClient();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String starWarsPeopleHeight;
+
+        try {
+            HttpGet getRequest = new HttpGet("http://swapi.co/api/people/" + randomNum + "/");
+            HttpResponse httpResponse = httpclient.execute(getRequest);
+            StarWarsPeople starWarsPeople = objectMapper.readValue(httpResponse.getEntity().getContent(), StarWarsPeople.class);
+            starWarsPeopleHeight = starWarsPeople.getHeight();
+        } catch (Exception e) {
+            starWarsPeopleHeight = null;
+        }
+        if (starWarsPeopleHeight != null && Integer.parseInt(starWarsPeopleHeight) < 170){
+            antibiotics ++;
+        } else {
+            rest ++;
+        }
+    }
+
+    private void drCurrentWeather (){
+        DefaultHttpClient httpclient = new DefaultHttpClient();
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
+        String weather;
+
+        try {
+            HttpGet getRequest = new HttpGet("http://api.openweathermap.org/data/2.5/forecast?lat=39.099727&lon=-94.578567&APPID=d728fdbe10c0047a8d45fd286f6eb1a9");
+            HttpResponse httpResponse = httpclient.execute(getRequest);
+            WeatherConditions weatherConditions = objectMapper.readValue(httpResponse.getEntity().getContent(), WeatherConditions.class);
+            weather = weatherConditions.getWeatherList()[0].getWeatherInfo()[0].getMain();
+        } catch (Exception e) {
+             weather = null;
+        }
+        if (weather != null && !weather.equals("Clear")){
+            antibiotics ++;
+        } else {
+            rest ++;
+        }
     }
 }
 
@@ -208,3 +291,48 @@ class GoogleEntries{
         return content;
     }
 }
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+class StarWarsPeople{
+
+    @JsonProperty("height")
+    private String height;
+
+    public String getHeight() {
+        return height;
+    }
+}
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+class WeatherConditions{
+
+    @JsonProperty("list")
+    private WeatherAttributesList[] weatherList;
+
+    public WeatherAttributesList[] getWeatherList() {
+        return weatherList;
+    }
+}
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+class WeatherAttributesList{
+
+    @JsonProperty("weather")
+    private WeatherInfo[] weatherInfo;
+
+    public WeatherInfo[] getWeatherInfo() {
+        return weatherInfo;
+    }
+}
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+class WeatherInfo{
+
+    @JsonProperty("main")
+    private String main;
+
+    public String getMain() {
+        return main;
+    }
+}
+
