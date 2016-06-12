@@ -64,10 +64,17 @@ public class ThatDrugTrial implements DoctorBot {
         drPatientTemp(patientTemperature);
 
         if (antibiotics >= rest){
+            resetVotes();
             return true;
         } else {
+            resetVotes();
             return false;
         }
+    }
+
+    private void resetVotes(){
+        rest = 0;
+        antibiotics = 0;
     }
 
     private void drPatientTemp(float patientTemperature){
