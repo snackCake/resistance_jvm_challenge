@@ -34,32 +34,16 @@ class DrHouseBot : DoctorBot {
 
         private fun randomBool() = random.nextBoolean()
         private fun randomInt(lower: Int, upper: Int) = lower + random.nextInt((upper - lower) + 1)
-
-        private fun sendHipChatNotification(message: String, imageUrl: String = "", chance: Int = 900) {
-            if (randomInt(1, 1000) < chance) // don't do nothin'
-                return
-
-            try {
-                val imagePart = if (imageUrl != "") """<img src=\"$imageUrl\">""" else ""
-                HIPCHAT_URL
-                        .httpPost()
-                        .header(Pair("Authorization", "Bearer " + HIPCHAT_TOKEN))
-                        .header(Pair("Content-Type", "application/json"))
-                        .body("""{"message_format":"html","message":"$imagePart<p>$message</p>"}""")
-                        .response()
-            } catch(e: Exception) {
-                // do nothin'
-            }
-        }
     }
 
     private val house = DrHouse()
+    private val sentGifs: MutableSet<String> = mutableSetOf()
 
     init {
         sendHipChatNotification(
                 "The next season of House M.D. is starting! Let's see what happens!",
                 START_GIF,
-                chance = 0
+                alwaysSend = true
         )
     }
 
@@ -76,7 +60,28 @@ class DrHouseBot : DoctorBot {
         } == Decision.GIVE_DRUGS
     }
 
-    private class DrHouse() {
+    private fun sendHipChatNotification(message: String, imageUrl: String = "", alwaysSend: Boolean = false) {
+        if (!alwaysSend && (sentGifs.contains(imageUrl) || randomBool()))
+            if (randomInt(1, 1000) <= 950) // allow a small chance that we send anyway
+                return // don't send the GIF in order to not SPAM
+
+        // record that we're sending this GIF
+        sentGifs.add(imageUrl)
+
+        try {
+            val imagePart = if (imageUrl != "") """<img src=\"$imageUrl\">""" else ""
+            HIPCHAT_URL
+                    .httpPost()
+                    .header(Pair("Authorization", "Bearer " + HIPCHAT_TOKEN))
+                    .header(Pair("Content-Type", "application/json"))
+                    .body("""{"message_format":"html","message":"$imagePart<p>$message</p>"}""")
+                    .response()
+        } catch(e: Exception) {
+            // do nothin'
+        }
+    }
+
+    private inner class DrHouse() {
 
         var patientTemp: Float = 0.0f
         var yesterdaysScrips: List<Prescription> = emptyList()
@@ -120,7 +125,8 @@ class DrHouseBot : DoctorBot {
                     && (vicodinOnHand == 0
                     || gotYelledAtByCuddy
                     || mood == Mood.TOLLERABLE
-                    || (mood == Mood.BAD && maybe()))) {
+                    || (mood == Mood.BAD && maybe())
+                    || patientTemp > 103.0f)) {
                 true
             } else {
                 sendHipChatNotification(
@@ -148,8 +154,7 @@ class DrHouseBot : DoctorBot {
             val colleaguesWithATheory = yesterdaysScrips
                     .filter { it.isPrescribedAntibiotics }
             if (colleaguesWithATheory.count() >= 2) {
-                val (temp, colleague) = yesterdaysScrips
-                        .get(randomInt(0, colleaguesWithATheory.size - 1))
+                val (temp, colleague) = yesterdaysScrips[randomInt(0, colleaguesWithATheory.size - 1)]
                         .let { Pair(it.temperature, it.userId) }
 
                 annoyanceLevel += randomInt(5, (temp / 10).toInt())
