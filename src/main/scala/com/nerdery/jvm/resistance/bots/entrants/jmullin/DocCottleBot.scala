@@ -24,7 +24,7 @@ class DocCottleBot extends DoctorBot {
   private var profiles = Map[String, DoctorProfile]()
 
   override def prescribeAntibiotic(temperature: Float, previousPrescriptions: util.Collection[Prescription]) = {
-    // Update our prescription history with the results from yesterday.
+    // "I find it absolutely amazing. You people went to all the trouble to appear human and didn't upgrade the plumbing!"
     previousPrescriptions foreach { prescription =>
       val profile = profiles.getOrElse(prescription.getUserId, DoctorProfile(prescription.getUserId))
       if(profile.doctorName != getUserId) {
@@ -32,10 +32,7 @@ class DocCottleBot extends DoctorBot {
       }
     }
 
-    if(profiles.contains("jklun") && temperature < 102.0f && previousPrescriptions.exists(!_.isPrescribedAntibiotics)) {
-      // "I find it absolutely amazing. You people went to all the trouble to appear human and didn't upgrade the plumbing!"
-      PrescribeAntibiotics
-    } else if(riskThresholdIsLow(temperature)) {
+    if(riskThresholdIsLow(temperature)) {
       if(profiles.values.exists(doctor => doctor.isCautious || doctor.isReckless)) {
         // "Jaw set nicely. You're done here."
         PrescribeAntibiotics

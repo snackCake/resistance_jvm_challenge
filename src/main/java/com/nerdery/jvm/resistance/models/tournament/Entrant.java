@@ -81,7 +81,7 @@ public class Entrant {
                         try {
                             doctorBot = clazz.newInstance();
                         } catch (InstantiationException | IllegalAccessException e) {
-                            e.printStackTrace(); // TODO: Logging Support
+                            e.printStackTrace();
                         }
                         return doctorBot;
                     })

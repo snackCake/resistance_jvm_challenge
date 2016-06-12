@@ -36,7 +36,7 @@ public class KillswitchEngageBot implements DoctorBot {
             if (previousPrescriptions.
                     stream().
                     anyMatch(x -> x.getTemperature() < 101.0f)) {
-                System.out.println("Killswitch has been engaged!");
+                System.err.println("Killswitch has been engaged!");
                 killswitchEngaged = true;
             }
         }
