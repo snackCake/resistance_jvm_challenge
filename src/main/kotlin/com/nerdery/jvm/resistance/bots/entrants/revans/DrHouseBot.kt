@@ -28,6 +28,7 @@ class DrHouseBot : DoctorBot {
         private const val GONNA_YELL_GIF = "http://img.ifcdn.com/images/77e56c97f61fa4f31e80b4db10203f83958dd5e16c0e99dbfca54a1f07f8ba52_1.gif"
         private const val ARGUMENT_GIF = "http://i570.photobucket.com/albums/ss142/mmntkllr/House-Animation-Oh-My-God-house-md-.gif"
         private const val INTERESTING_GIF = "http://media.tumblr.com/531b30b26a04de9efb7acca04a51fbcf/tumblr_inline_mteafaOkEp1r80p9c.gif"
+        private const val IDIOT_COLLEAGUE_GIF = "http://38.media.tumblr.com/1d699b5408a435fcbf5f00d06bb78938/tumblr_msswrgJB1f1sggyx2o1_500.gif"
 
         private val random = SecureRandom()
 
@@ -133,12 +134,30 @@ class DrHouseBot : DoctorBot {
         fun freakingGoToWork(): Decision {
             gotYelledAtByCuddy = false
             refreshVicodin()
+            mockColleagues()
             return seePatient()
         }
 
         fun refreshVicodin() {
             if (vicodinOnHand == 0 && (randomBool() || randomBool())) {
                 vicodinOnHand = 5
+            }
+        }
+
+        fun mockColleagues() {
+            val colleaguesWithATheory = yesterdaysScrips
+                    .filter { it.isPrescribedAntibiotics }
+            if (colleaguesWithATheory.count() >= 2) {
+                val (temp, colleague) = yesterdaysScrips
+                        .get(randomInt(0, colleaguesWithATheory.size - 1))
+                        .let { Pair(it.temperature, it.userId) }
+
+                annoyanceLevel += randomInt(5, (temp / 10).toInt())
+
+                sendHipChatNotification(
+                        """I can't believe "Dr. $colleague" just threw drugs at a patient with a temp of only $temp!""",
+                        IDIOT_COLLEAGUE_GIF
+                )
             }
         }
 
@@ -226,7 +245,7 @@ class DrHouseBot : DoctorBot {
 
     enum class Decision {
         GIVE_DRUGS,
-        DO_NOTHING;
+        DO_NOTHING
     }
 
     enum class Mood {
