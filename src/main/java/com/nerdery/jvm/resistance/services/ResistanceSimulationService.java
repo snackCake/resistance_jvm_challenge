@@ -6,6 +6,8 @@ import com.nerdery.jvm.resistance.models.Patient;
 import com.nerdery.jvm.resistance.models.PatientOutcome;
 import com.nerdery.jvm.resistance.models.Prescription;
 import com.nerdery.jvm.resistance.models.tournament.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -15,6 +17,8 @@ import java.util.stream.IntStream;
  * @author Josh Klun (jklun@nerdery.com)
  */
 public class ResistanceSimulationService {
+
+    private static final Logger logger = LoggerFactory.getLogger(ResistanceSimulationService.class);
 
     private MicrobialSimulationService microbialSimulation;
 
@@ -27,7 +31,7 @@ public class ResistanceSimulationService {
                 .stream()
                 .map(this::runGeneration)
                 .forEach(this::updateEntrantsWithResults);
-        System.err.println(tournament.listScoredEntrants());
+        logger.info("Tournament entrants: {}", tournament.listScoredEntrants());
     }
 
     private void updateEntrantsWithResults(List<Map<Entrant, PatientOutcome>> generationPatientOutcomes) {
@@ -73,7 +77,7 @@ public class ResistanceSimulationService {
     }
 
     private List<Map<Entrant, PatientOutcome>> runGeneration(TownGeneration generation) {
-        System.err.println("Running generation: " + generation);
+        logger.info("Running generation: {}", generation);
         final List<PatientOutcome> previousDay = new ArrayList<>(generation.getEntrants().size());
         return generation.getDays()
                 .stream()
@@ -83,15 +87,15 @@ public class ResistanceSimulationService {
 
     private Map<Entrant, PatientOutcome> runAndScoreDay(List<PatientOutcome> previousDay, TownDay day) {
         if (previousDay.size() > 0 && previousDay.get(0).getOutcome() == Outcome.UNLUCKY_VIRAL_ANTIBIOTICS) {
-            System.err.println("Not running day, because the town has been wiped out: " + day);
+            logger.info("Not running day, because the town has been wiped out: {}", day);
             return Collections.emptyMap();
         }
 
-        System.err.println("Running day: " + day);
+        logger.info("Running day: {}", day);
         List<Prescription> prescriptions = runDay(day, previousDay);
 
         List<PatientOutcome> outcomes = microbialSimulation.divineOutcomes(day.getPatients(), prescriptions);
-        System.err.println("On day #" + day.getDayNumber() + " patients had the following outcomes: " + outcomes);
+        logger.info("On day #{} patients had the following outcomes: {}", day.getDayNumber(), outcomes);
         previousDay.clear();
         previousDay.addAll(outcomes);
 
@@ -111,7 +115,8 @@ public class ResistanceSimulationService {
                         antibiotics = doctor.prescribeAntibioticHipaaDubious(patient.getTemperature(), previousDay);
                     } catch (Exception e) {
                         // Broad Exception catch here, because I can't trust that all bots are error free.
-                        e.printStackTrace();
+                        logger.info("Doctor will prescribe rest.");
+                        logger.error("Doctor threw an error: " + doctor.getClass().getSimpleName(), e);
                         antibiotics = false;
                     }
                     return new Prescription(doctor.getUserId(), antibiotics, patient.getTemperature());

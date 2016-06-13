@@ -2,6 +2,8 @@ package com.nerdery.jvm.resistance.models.tournament;
 
 import com.nerdery.jvm.resistance.bots.DoctorBot;
 import org.reflections.Reflections;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -65,6 +67,7 @@ public class Entrant {
     }
 
     public static class EntrantFinder {
+        private static final Logger logger = LoggerFactory.getLogger(EntrantFinder.class);
 
         private String searchPackage;
 
@@ -81,7 +84,7 @@ public class Entrant {
                         try {
                             doctorBot = clazz.newInstance();
                         } catch (InstantiationException | IllegalAccessException e) {
-                            e.printStackTrace();
+                            logger.error("Error loading bot " + clazz, e);
                         }
                         return doctorBot;
                     })

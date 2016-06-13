@@ -10,6 +10,9 @@ import java.util.Optional;
  * Jon Huff's bot for the JVM Resistance challenge.
  */
 public class DoctorHuffBot implements DoctorBot {
+
+    private static final Logger logger = LoggerFactory.getLogger(DoctorHuffBot.class);
+
     private DocHistory docHistoryA = new DocHistory();
     private DocHistory docHistoryB = new DocHistory();
     private DocHistory docHistoryC = new DocHistory();
@@ -36,7 +39,7 @@ public class DoctorHuffBot implements DoctorBot {
         float docBForecast = docHistoryB.getAntibioticPercentage();
         float docCForecast = docHistoryC.getAntibioticPercentage();
 
-        System.out.println("[" + docHistoryA.getUserId() +": "+docAForecast+"][" + docHistoryB.getUserId() +": "+docBForecast+"][" + docHistoryC.getUserId() +": "+docCForecast+"]");
+        logger.debug("[" + docHistoryA.getUserId() +": "+docAForecast+"][" + docHistoryB.getUserId() +": "+docBForecast+"][" + docHistoryC.getUserId() +": "+docCForecast+"]");
 
         // ---[ 0% chance ]-----------------------------------------------------------------------------------------------------------------
         if (patientTemperature < 100.0) {
@@ -82,14 +85,14 @@ public class DoctorHuffBot implements DoctorBot {
     private void addPrescriptionsToDocHistories(Collection<Prescription> previousPrescriptions) {
         if (!previousPrescriptions.isEmpty() && docHistoryA.getUserId() == null ) {
 
-            System.out.println("Initializing histories...");
+            logger.debug("Initializing histories...");
             docHistoryA.setUserId(((Prescription)previousPrescriptions.toArray()[1]).getUserId());
             docHistoryB.setUserId(((Prescription)previousPrescriptions.toArray()[2]).getUserId());
             docHistoryC.setUserId(((Prescription)previousPrescriptions.toArray()[3]).getUserId());
 
-            System.out.println("A: " + docHistoryA.getUserId());
-            System.out.println("B: " + docHistoryB.getUserId());
-            System.out.println("C: " + docHistoryC.getUserId());
+            logger.debug("A: " + docHistoryA.getUserId());
+            logger.debug("B: " + docHistoryB.getUserId());
+            logger.debug("C: " + docHistoryC.getUserId());
         }
 
         for (Prescription script : previousPrescriptions) {

@@ -7,6 +7,8 @@ import akka.actor._
 import akka.actor.{Actor, ActorLogging, ActorSystem, Props}
 import com.nerdery.jvm.resistance.bots.DoctorBot
 import com.nerdery.jvm.resistance.models.Prescription
+import com.nerdery.jvm.resistance.services.MicrobialSimulationService
+import org.slf4j.{Logger, LoggerFactory}
 import twitter4j.{StatusUpdate, TwitterFactory}
 
 import scala.collection.JavaConversions._
@@ -43,13 +45,13 @@ class HopperBayesianBot(tweetMuch: Boolean = true) extends DoctorBot {
     val probMoneyIfPrescribeAntibiotic: Float = probMoneyGivenAntibiotic(temp)
     val probMoneyIfPrescribeRest: Float = probMoneyGivenRest(temp)
 
-    println(s"Patient temp: $patientTemperature")
-    println(s"Probability of money if prescribe antibiotic: $probMoneyIfPrescribeAntibiotic")
-    println(s"Probability of money if prescribe rest: $probMoneyIfPrescribeRest")
+    logger.debug(s"Patient temp: $patientTemperature")
+    logger.debug(s"Probability of money if prescribe antibiotic: $probMoneyIfPrescribeAntibiotic")
+    logger.debug(s"Probability of money if prescribe rest: $probMoneyIfPrescribeRest")
 
     //do the comparison. If it's within 5%, then we'll just go with antibiotics 'cause we get moar $$$
     val prescribeDrugs = probMoneyIfPrescribeAntibiotic > (probMoneyIfPrescribeRest - 0.05f)
-    println(s"Prescribe antibiotics?: $prescribeDrugs")
+    logger.debug(s"Prescribe antibiotics?: $prescribeDrugs")
 
     val status: StatusUpdate = buildStatus(patientTemperature, prescribeDrugs, probMoneyIfPrescribeAntibiotic, probMoneyIfPrescribeRest)
     val otherDocStatus = buildOtherDocStatusMaybe(previousPrescriptions.toList)
@@ -59,8 +61,7 @@ class HopperBayesianBot(tweetMuch: Boolean = true) extends DoctorBot {
         otherDocStatus.foreach(s => twitterActor ! s)
       } catch {
         case t: Throwable =>
-          println(s"Something went wrong whilst tweeting: $t")
-          t.printStackTrace()
+          logger.error(s"Something went wrong whilst tweeting:", t)
       }
     }
 
@@ -81,7 +82,7 @@ class HopperBayesianBot(tweetMuch: Boolean = true) extends DoctorBot {
         case _ => None
       }
       statusOpt.map { status =>
-        println(status)
+        logger.debug(status)
         val update = new StatusUpdate(status)
         update.setPossiblySensitive(false) //hilarious
         update
@@ -98,7 +99,7 @@ class HopperBayesianBot(tweetMuch: Boolean = true) extends DoctorBot {
       case true => s"Prescribed drugs to a patient with a fever of ${format(temp)}F as there's a $antiMoneyStr% chance I get $$$$$$ from this (vs $restMoneyStr%) $HASHTAG"
       case false => s"Told some fool to rest up because their fever was ${format(temp)}F and there's a $restMoneyStr% chance I get $$$$$$ from this (vs $antiMoneyStr%) $HASHTAG"
     }
-    println(status)
+    logger.debug(status)
     val update: StatusUpdate = new StatusUpdate(status)
     update.setPossiblySensitive(false) //hilarious
     update
@@ -167,6 +168,7 @@ object HopperBayesianBot {
   //sure, we could just use futures, but why not over-engineer and just use Akka?
   private lazy val system = ActorSystem("HopperBayes")
   private lazy val twitterActor = system.actorOf(Props(classOf[TweetMuch]), "tweet-much")
+  private val logger = LoggerFactory.getLogger(classOf[HopperBayesianBot])
 
   class TweetMuch extends Actor with ActorLogging {
     def receive = {

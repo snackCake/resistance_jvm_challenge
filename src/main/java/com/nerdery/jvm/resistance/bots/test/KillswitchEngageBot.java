@@ -2,6 +2,9 @@ package com.nerdery.jvm.resistance.bots.test;
 
 import com.nerdery.jvm.resistance.bots.DoctorBot;
 import com.nerdery.jvm.resistance.models.Prescription;
+import com.nerdery.jvm.resistance.services.MicrobialSimulationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 
@@ -20,6 +23,8 @@ import java.util.Collection;
  */
 public class KillswitchEngageBot implements DoctorBot {
 
+    private static final Logger logger = LoggerFactory.getLogger(KillswitchEngageBot.class);
+
     //start the bot in a peaceful state
     private boolean killswitchEngaged = false;
 
@@ -36,7 +41,7 @@ public class KillswitchEngageBot implements DoctorBot {
             if (previousPrescriptions.
                     stream().
                     anyMatch(x -> x.getTemperature() < 101.0f)) {
-                System.err.println("Killswitch has been engaged!");
+                logger.debug("Killswitch has been engaged!");
                 killswitchEngaged = true;
             }
         }

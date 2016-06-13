@@ -4,6 +4,8 @@ import com.nerdery.jvm.resistance.models.Outcome;
 import com.nerdery.jvm.resistance.models.Patient;
 import com.nerdery.jvm.resistance.models.PatientOutcome;
 import com.nerdery.jvm.resistance.models.Prescription;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.security.SecureRandom;
 import java.util.List;
@@ -16,6 +18,7 @@ import java.util.stream.IntStream;
  */
 public class MicrobialSimulationService {
 
+    private static final Logger logger = LoggerFactory.getLogger(MicrobialSimulationService.class);
     private Random randomGenerator;
     private double dailyLuck;
 
@@ -55,7 +58,8 @@ public class MicrobialSimulationService {
                 outcome = Outcome.UNLUCKY_VIRAL_ANTIBIOTICS;
             }
         }
-        System.err.println("Patient [" + patient + "] got outcome: " + outcome);
+
+        logger.info("Patient [ {} ] got outcome: {}", patient, outcome);
         return outcome;
     }
 
