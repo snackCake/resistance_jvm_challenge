@@ -106,7 +106,14 @@ public class ResistanceSimulationService {
                 .mapToObj(i -> {
                     Patient patient = day.getPatients().get(i);
                     DoctorBot doctor = day.getDoctors().get(i).getDoctorBot();
-                    boolean antibiotics = doctor.prescribeAntibioticHipaaDubious(patient.getTemperature(), previousDay);
+                    boolean antibiotics;
+                    try {
+                        antibiotics = doctor.prescribeAntibioticHipaaDubious(patient.getTemperature(), previousDay);
+                    } catch (Exception e) {
+                        // Broad Exception catch here, because I can't trust that all bots are error free.
+                        e.printStackTrace();
+                        antibiotics = false;
+                    }
                     return new Prescription(doctor.getUserId(), antibiotics, patient.getTemperature());
                 }).collect(Collectors.toList());
     }
