@@ -15,4 +15,4 @@ dist
 /.settings
 /build/**/**
 .gradle/**
-    
+src/main/resources/twitter4j.properties
