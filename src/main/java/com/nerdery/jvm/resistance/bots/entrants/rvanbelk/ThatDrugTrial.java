@@ -168,12 +168,12 @@ public class ThatDrugTrial implements DoctorBot {
             HttpResponse httpResponse = httpclient.execute(getRequest);
             StarWarsPeople starWarsPeople = objectMapper.readValue(httpResponse.getEntity().getContent(), StarWarsPeople.class);
             starWarsPeopleHeight = starWarsPeople.getHeight();
+            if (starWarsPeopleHeight != null && Integer.parseInt(starWarsPeopleHeight) < 170){
+                antibiotics ++;
+            } else {
+                rest ++;
+            }
         } catch (Exception e) {
-            starWarsPeopleHeight = null;
-        }
-        if (starWarsPeopleHeight != null && Integer.parseInt(starWarsPeopleHeight) < 170){
-            antibiotics ++;
-        } else {
             rest ++;
         }
     }
