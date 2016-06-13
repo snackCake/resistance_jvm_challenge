@@ -8,11 +8,28 @@ import java.util.Objects;
 public class PatientOutcome {
 
     private Patient patient;
+    private Prescription prescription;
     private Outcome outcome;
 
-    public PatientOutcome(Patient patient, Outcome outcome) {
+    public PatientOutcome(Patient patient, Prescription prescription, Outcome outcome) {
         this.patient = patient;
+        this.prescription = prescription;
         this.outcome = outcome;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PatientOutcome that = (PatientOutcome) o;
+        return Objects.equals(patient, that.patient) &&
+                Objects.equals(prescription, that.prescription) &&
+                outcome == that.outcome;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(patient, prescription, outcome);
     }
 
     public Patient getPatient() {
@@ -23,24 +40,15 @@ public class PatientOutcome {
         return outcome;
     }
 
-    @Override
-    public boolean equals(Object atheO) {
-        if (this == atheO) return true;
-        if (atheO == null || getClass() != atheO.getClass()) return false;
-        PatientOutcome athat = (PatientOutcome) atheO;
-        return Objects.equals(patient, athat.patient) &&
-                outcome == athat.outcome;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(patient, outcome);
+    public Prescription getPrescription() {
+        return prescription;
     }
 
     @Override
     public String toString() {
         return "PatientOutcome{" +
                 "patient=" + patient +
+                ", prescription=" + prescription +
                 ", outcome=" + outcome +
                 '}';
     }
