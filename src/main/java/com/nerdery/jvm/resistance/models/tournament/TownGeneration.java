@@ -16,10 +16,12 @@ public class TownGeneration {
 
     private List<Entrant> entrants;
     private List<TownDay> days;
+    private int generationNumber;
 
-    private TownGeneration(List<Entrant> entrants, List<TownDay> days) {
+    private TownGeneration(List<Entrant> entrants, List<TownDay> days, int generationNumber) {
         this.entrants = entrants;
         this.days = days;
+        this.generationNumber = generationNumber;
     }
 
     public static TownGenerationBuilder builder() {
@@ -34,18 +36,23 @@ public class TownGeneration {
         return entrants;
     }
 
+    public int getGenerationNumber() {
+        return generationNumber;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TownGeneration that = (TownGeneration) o;
         return Objects.equals(entrants, that.entrants) &&
-                Objects.equals(days, that.days);
+                Objects.equals(days, that.days) &&
+                generationNumber == that.generationNumber;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(entrants, days);
+        return Objects.hash(entrants, days, generationNumber);
     }
 
     @Override
@@ -53,6 +60,7 @@ public class TownGeneration {
         return "TownGeneration{" +
                 "entrants=" + entrants +
                 ", days=" + days +
+                ", generationNumber=" + generationNumber +
                 '}';
     }
 
@@ -61,11 +69,13 @@ public class TownGeneration {
         private List<Entrant> entrants;
         private int maximumDays;
         private int minimumDays;
+        private int generationNumber;
 
         private TownGenerationBuilder() {
             entrants = Collections.emptyList();
             minimumDays = 1;
             maximumDays = 1;
+            generationNumber = 0;
         }
 
         public TownGenerationBuilder entrants(List<Entrant> entrants) {
@@ -85,7 +95,7 @@ public class TownGeneration {
 
         public TownGeneration build() {
             List<TownDay> days = buildDays(entrants, minimumDays, maximumDays);
-            return new TownGeneration(entrants, days);
+            return new TownGeneration(entrants, days, generationNumber++);
         }
 
         private List<TownDay> buildDays(List<Entrant> entrants, int minimumPatients, int maximumPatients) {

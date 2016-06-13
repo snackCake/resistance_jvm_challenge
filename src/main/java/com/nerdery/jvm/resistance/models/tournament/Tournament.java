@@ -82,18 +82,18 @@ public class Tournament {
 
         private List<TownGeneration> buildGenerations(List<Entrant> entrants) {
             Combinations combinations = new Combinations(entrants.size(), TownGeneration.DOCTORS_PER_TOWN);
+            TownGeneration.TownGenerationBuilder builder = TownGeneration.builder();
             return Lists.newArrayList(combinations)
                     .stream()
                     .map(indexArray ->
                             Arrays.stream(indexArray)
                                     .boxed()
                                     .map(entrants::get).collect(Collectors.toList()))
-                    .map(generationEntrants ->
-                            TownGeneration.builder()
-                                    .minimumDays(MINIMUM_DAYS)
-                                    .maximumDays(MAXIMUM_DAYS)
-                                    .entrants(generationEntrants)
-                                    .build())
+                    .map(generationEntrants -> builder
+                            .minimumDays(MINIMUM_DAYS)
+                            .maximumDays(MAXIMUM_DAYS)
+                            .entrants(generationEntrants)
+                            .build())
                     .collect(Collectors.toList());
         }
     }

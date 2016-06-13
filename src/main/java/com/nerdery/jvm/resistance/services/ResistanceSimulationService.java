@@ -6,9 +6,15 @@ import com.nerdery.jvm.resistance.models.Patient;
 import com.nerdery.jvm.resistance.models.PatientOutcome;
 import com.nerdery.jvm.resistance.models.Prescription;
 import com.nerdery.jvm.resistance.models.tournament.*;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -19,19 +25,29 @@ import java.util.stream.IntStream;
 public class ResistanceSimulationService {
 
     private static final Logger logger = LoggerFactory.getLogger(ResistanceSimulationService.class);
+    private static final String csvPattern = "resistance-{0,date}-{0,time}.csv";
 
     private MicrobialSimulationService microbialSimulation;
+    private CSVPrinter csvPrinter;
 
     public ResistanceSimulationService(MicrobialSimulationService microbialSimulation) {
         this.microbialSimulation = microbialSimulation;
     }
 
     public void runTournament(Tournament tournament) {
-        tournament.getGenerations()
-                .stream()
-                .map(this::runGeneration)
-                .forEach(this::updateEntrantsWithResults);
-        logger.info("Tournament entrants: {}", tournament.listScoredEntrants());
+        try (FileWriter csvOutput = new FileWriter(new File(MessageFormat.format(csvPattern, new Date())))) {
+            initCsv(csvOutput);
+
+            tournament.getGenerations()
+                    .stream()
+                    .map(this::runGeneration)
+                    .forEach(this::updateEntrantsWithResults);
+
+            csvPrinter.close();
+            logger.info("Tournament entrants: {}", tournament.listScoredEntrants());
+        } catch (IOException e) {
+            logger.error("Error opening CSV file", e);
+        }
     }
 
     private void updateEntrantsWithResults(List<Map<Entrant, PatientOutcome>> generationPatientOutcomes) {
@@ -81,7 +97,17 @@ public class ResistanceSimulationService {
         final List<PatientOutcome> previousDay = new ArrayList<>(generation.getEntrants().size());
         return generation.getDays()
                 .stream()
-                .map(day -> runAndScoreDay(previousDay, day))
+                .map(day -> {
+                    Map<Entrant, PatientOutcome> entrantPatientOutcomeMap = runAndScoreDay(previousDay, day);
+                    entrantPatientOutcomeMap.entrySet().stream().forEach(entrantPatientOutcome ->
+                            logPrescriptionEvent(generation.getGenerationNumber(),
+                                    day,
+                                    entrantPatientOutcome.getValue().getPatient(),
+                                    entrantPatientOutcome.getKey().getDoctorBot(),
+                                    entrantPatientOutcome.getValue().getPrescription().isPrescribedAntibiotics(),
+                                    entrantPatientOutcome.getValue().getPrescription().getContemplationTime()));
+                    return entrantPatientOutcomeMap;
+                })
                 .collect(Collectors.toList());
     }
 
@@ -110,16 +136,59 @@ public class ResistanceSimulationService {
                 .mapToObj(i -> {
                     Patient patient = day.getPatients().get(i);
                     DoctorBot doctor = day.getDoctors().get(i).getDoctorBot();
-                    boolean antibiotics;
-                    try {
-                        antibiotics = doctor.prescribeAntibioticHipaaDubious(patient.getTemperature(), previousDay);
-                    } catch (Exception e) {
-                        // Broad Exception catch here, because I can't trust that all bots are error free.
-                        logger.info("Doctor will prescribe rest.");
-                        logger.error("Doctor threw an error: " + doctor.getClass().getSimpleName(), e);
-                        antibiotics = false;
-                    }
-                    return new Prescription(doctor.getUserId(), antibiotics, patient.getTemperature());
+                    return seePatient(previousDay, patient, doctor);
                 }).collect(Collectors.toList());
+    }
+
+    private Prescription seePatient(Collection<PatientOutcome> previousDay, Patient patient, DoctorBot doctor) {
+        boolean antibiotics;
+        long startTime = System.currentTimeMillis();
+        try {
+            antibiotics = doctor.prescribeAntibioticHipaaDubious(patient.getTemperature(), previousDay);
+        } catch (Exception e) {
+            // Broad Exception catch here, because I can't trust that all bots are error free.
+            logger.info("Doctor will prescribe rest.");
+            logger.error("Doctor threw an error: " + doctor.getClass().getSimpleName(), e);
+            antibiotics = false;
+        }
+        long runtime = System.currentTimeMillis() - startTime;
+        return new Prescription(doctor.getUserId(), antibiotics, patient.getTemperature(), runtime);
+    }
+
+
+    private void initCsv(FileWriter csvOutput) throws IOException {
+        csvPrinter = new CSVPrinter(csvOutput, CSVFormat.DEFAULT);
+        try {
+            csvPrinter.printRecord("Generation Number",
+                    "Day Number",
+                    "Doctor User ID",
+                    "Doctor Class Name",
+                    "Patient Temperature",
+                    "Patient Bacterial Infection",
+                    "Doctor Prescribed Antibiotics",
+                    "Runtime ms");
+        } catch (IOException e) {
+            logger.error("Failed to write CSV header", e);
+        }
+    }
+
+    private void logPrescriptionEvent(int generationNumber,
+                                      TownDay day,
+                                      Patient patient,
+                                      DoctorBot doctor,
+                                      boolean antibiotics,
+                                      long runtime) {
+        try {
+            csvPrinter.printRecord(((Integer)generationNumber).toString(),
+                    ((Integer)day.getDayNumber()).toString(),
+                    doctor.getUserId(),
+                    doctor.getClass().getSimpleName(),
+                    ((Float)patient.getTemperature()).toString(),
+                    ((Boolean)patient.isBacterialInfection()).toString(),
+                    ((Boolean)antibiotics).toString(),
+                    ((Long)runtime).toString());
+        } catch (IOException e) {
+            logger.error("Failed to write CSV Record for doctor: " + doctor.getClass().getSimpleName(), e);
+        }
     }
 }
