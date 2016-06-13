@@ -94,6 +94,7 @@ public class ResistanceSimulationService {
 
     private List<Map<Entrant, PatientOutcome>> runGeneration(TownGeneration generation) {
         logger.info("Running generation: {}", generation);
+        resetEntrants(generation.getEntrants());
         final List<PatientOutcome> previousDay = new ArrayList<>(generation.getEntrants().size());
         return generation.getDays()
                 .stream()
@@ -109,6 +110,10 @@ public class ResistanceSimulationService {
                     return entrantPatientOutcomeMap;
                 })
                 .collect(Collectors.toList());
+    }
+
+    private void resetEntrants(List<Entrant> entrants) {
+        entrants.stream().forEach(Entrant::resetDoctorBot);
     }
 
     private Map<Entrant, PatientOutcome> runAndScoreDay(List<PatientOutcome> previousDay, TownDay day) {

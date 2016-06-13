@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
  * @author Josh Klun (jklun@nerdery.com)
  */
 public class Entrant {
+    private static final Logger logger = LoggerFactory.getLogger(Entrant.class);
     private DoctorBot doctorBot;
     private List<EntrantGenerationResult> results;
 
@@ -38,6 +39,15 @@ public class Entrant {
 
     public void addGenerationResult(EntrantGenerationResult result) {
         this.results.add(result);
+    }
+
+    public void resetDoctorBot() {
+        try {
+            this.doctorBot = DoctorBot.class.newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            // This really shouldn't happen.
+            logger.error("Failed to reset doctor bot: ", e);
+        }
     }
 
     public static EntrantFinder finder() {
