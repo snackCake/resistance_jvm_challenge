@@ -43,7 +43,7 @@ public class Entrant {
 
     public void resetDoctorBot() {
         try {
-            this.doctorBot = DoctorBot.class.newInstance();
+            this.doctorBot = this.doctorBot.getClass().newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
             // This really shouldn't happen.
             logger.error("Failed to reset doctor bot: ", e);
