@@ -2,6 +2,8 @@ package com.nerdery.jvm.resistance.models.tournament;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.math3.util.Combinations;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -62,6 +64,7 @@ public class Tournament {
     }
 
     public static class TournamentBuilder {
+        private static final Logger logger = LoggerFactory.getLogger(TournamentBuilder.class);
 
         private String entrantPackage;
 
@@ -76,7 +79,9 @@ public class Tournament {
 
         public Tournament build() {
             List<Entrant> entrants = Entrant.finder().searchPackage(entrantPackage).find();
+            entrants.stream().forEach(entrant -> logger.info("Entrant loaded: {}", entrant));
             List<TownGeneration> generations = buildGenerations(entrants);
+            logger.info("Found {} entrants, which means there will be {} generations.", entrants.size(), generations.size());
             return new Tournament(entrants, generations);
         }
 
