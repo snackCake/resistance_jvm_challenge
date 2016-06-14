@@ -94,24 +94,24 @@ public class ThatDrugTrial implements DoctorBot {
     }
 
     private void drHowAreTheRoyalsDoing(){
-        DefaultHttpClient httpclient = new DefaultHttpClient();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String streak;
-
-        try {
-            HttpGet getRequest = new HttpGet("https://erikberg.com/mlb/standings.json");
-            HttpResponse httpResponse = httpclient.execute(getRequest);
-            MlbStandings standings = objectMapper.readValue(httpResponse.getEntity().getContent(), MlbStandings.class);
-            List<TeamStandings> royals = Arrays.stream(standings.getTeamStandings()).filter(t -> "kansas-city-royals".equals(t.getTeamId())).collect(Collectors.toList());
-            streak = royals.get(0).getStreakType();
-        } catch (Exception e){//we'll probably hit api request limit, so just return null
-            streak = null;
-        }
-        if (streak != null && streak.equals("loss")){
-            antibiotics ++;
-        } else {
-            rest ++;
-        }
+//        DefaultHttpClient httpclient = new DefaultHttpClient();
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        String streak;
+//
+//        try {
+//            HttpGet getRequest = new HttpGet("https://erikberg.com/mlb/standings.json");
+//            HttpResponse httpResponse = httpclient.execute(getRequest);
+//            MlbStandings standings = objectMapper.readValue(httpResponse.getEntity().getContent(), MlbStandings.class);
+//            List<TeamStandings> royals = Arrays.stream(standings.getTeamStandings()).filter(t -> "kansas-city-royals".equals(t.getTeamId())).collect(Collectors.toList());
+//            streak = royals.get(0).getStreakType();
+//        } catch (Exception e){//we'll probably hit api request limit, so just return null
+//            streak = null;
+//        }
+//        if (streak != null && streak.equals("loss")){
+//            antibiotics ++;
+//        } else {
+//            rest ++;
+//        }
     }
 
     private void drMoonPhases(){
