@@ -33,22 +33,30 @@ public class DrSpacemanBot implements DoctorBot {
 
         PrescriptionStrategy strategy = new StandardStrategy();
 
-        for (Prescription prescription : previousPrescriptions) {
-            String userId = prescription.getUserId();
+        if (previousPrescriptions.isEmpty()) {
+            otherDoctors.clear();
 
-            if (USER_ID.equals(userId)) {
-                continue;
-            }
+            for (Prescription prescription : previousPrescriptions) {
+                String userId = prescription.getUserId();
 
-            OtherDoctor otherDoctor = otherDoctors.get(userId);
+                if (USER_ID.equals(userId)) {
+                    continue;
+                }
 
-            if (otherDoctor == null) {
                 otherDoctors.put(userId, new OtherDoctor());
-                strategy = new StandardStrategy();
-            } else {
-                otherDoctor.addPrescription(prescription);
-                strategy = PrescriptionStrategyFactory.INSTANCE.getStrategy(otherDoctors.values());
             }
+        } else {
+            for (Prescription prescription : previousPrescriptions) {
+                String userId = prescription.getUserId();
+
+                if (USER_ID.equals(userId)) {
+                    continue;
+                }
+
+                otherDoctors.get(userId).addPrescription(prescription);
+            }
+
+            strategy = PrescriptionStrategyFactory.INSTANCE.getStrategy(otherDoctors.values());
         }
 
         return strategy.getPrescription(patientTemperature, roundNumber);
@@ -183,11 +191,11 @@ public class DrSpacemanBot implements DoctorBot {
             return false;
         }
 
-        protected abstract boolean getLowInfectionChancePrescription();
-
         protected abstract boolean getIndeterminateChancePrescription();
 
         protected abstract boolean getHighInfectionChancePrescription();
+
+        protected abstract boolean getLowInfectionChancePrescription();
 
         boolean getDefiniteInfectionChancePrescription() {
             return true;
