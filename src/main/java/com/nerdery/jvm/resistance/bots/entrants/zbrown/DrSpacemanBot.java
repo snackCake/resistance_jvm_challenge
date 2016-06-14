@@ -29,29 +29,26 @@ public class DrSpacemanBot implements DoctorBot {
     @Override
     public boolean prescribeAntibiotic(float patientTemperature, Collection<Prescription> previousPrescriptions) {
         roundNumber++;
+        previousPrescriptions = previousPrescriptions == null ? Collections.emptyList() : previousPrescriptions;
 
         PrescriptionStrategy strategy = new StandardStrategy();
 
-        if (otherDoctors.isEmpty()) {
-            for (Prescription prescription : previousPrescriptions) {
-                String userId = prescription.getUserId();
+        for (Prescription prescription : previousPrescriptions) {
+            String userId = prescription.getUserId();
 
-                if (USER_ID.equals(userId)) {
-                    continue;
-                }
+            if (USER_ID.equals(userId)) {
+                continue;
+            }
 
+            OtherDoctor otherDoctor = otherDoctors.get(userId);
+
+            if (otherDoctor == null) {
                 otherDoctors.put(userId, new OtherDoctor());
+                strategy = new StandardStrategy();
+            } else {
+                otherDoctor.addPrescription(prescription);
+                strategy = PrescriptionStrategyFactory.INSTANCE.getStrategy(otherDoctors.values());
             }
-        } else {
-            for (Prescription prescription : previousPrescriptions) {
-                if (USER_ID.equals(prescription.getUserId())) {
-                    continue;
-                }
-
-                otherDoctors.get(prescription.getUserId()).addPrescription(prescription);
-            }
-
-            strategy = PrescriptionStrategyFactory.INSTANCE.getStrategy(otherDoctors.values());
         }
 
         return strategy.getPrescription(patientTemperature, roundNumber);
