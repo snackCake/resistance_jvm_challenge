@@ -90,17 +90,17 @@ public class DrSpacemanBot implements DoctorBot {
                 aggression += getAggression(doctor);
             }
 
-            float aggressionPercentage = aggression / 4;
+            float averageAggression = aggression / otherDoctors.size();
 
-            if (aggressionPercentage <= 0) {
+            if (averageAggression <= 0) {
                 return new AggressiveStrategy();
-            } else if (aggressionPercentage < .25) {
+            } else if (averageAggression < .25) {
                 return new ProgressivelyAggressiveStrategy();
-            } else if (aggressionPercentage < .5) {
+            } else if (averageAggression < .5) {
                 return new StandardStrategy();
-            } else if (aggressionPercentage < .75) {
+            } else if (averageAggression < .75) {
                 return new DefensiveStrategy();
-            } else if (aggressionPercentage < .99) {
+            } else if (averageAggression < .99) {
                 return new SafeStrategy();
             } else {
                 return new OverprescribeDefenseStrategy();
@@ -160,7 +160,7 @@ public class DrSpacemanBot implements DoctorBot {
                 aggression -= 2;
             }
 
-            return aggression > 0 ? aggression : 0;
+            return aggression > 0 ? aggression / 4 : 0;
         }
     }
 
