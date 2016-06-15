@@ -1,9 +1,13 @@
-package com.nerdery.jvm.resistance.bots;
+package com.nerdery.jvm.resistance.bots.entrants.jhuff;
 
+import com.nerdery.jvm.resistance.bots.DoctorBot;
 import com.nerdery.jvm.resistance.models.Prescription;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -30,9 +34,9 @@ public class DoctorHuffBot implements DoctorBot {
      * @return true if the patient should take antibiotics, false if they should not.
      */
     @Override
-    public boolean prescribeAntibiotic(float patientTemperature, Optional<Collection<Prescription>> previousPrescriptions) {
-        if (previousPrescriptions.isPresent()) {
-            addPrescriptionsToDocHistories(previousPrescriptions.get());
+    public boolean prescribeAntibiotic(float patientTemperature, Collection<Prescription> previousPrescriptions) {
+        if (!previousPrescriptions.isEmpty()) {
+            addPrescriptionsToDocHistories(previousPrescriptions);
         }
 
         float docAForecast = docHistoryA.getAntibioticPercentage();
