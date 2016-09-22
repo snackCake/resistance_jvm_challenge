@@ -16,9 +16,17 @@ public class TournamentRunner {
 
     public static final String DEFAULT_ENTRANT_PACKAGE = "com.nerdery.jvm.resistance.bots.entrants";
     public static final String TEST_ENTRANT_PACKAGE = "com.nerdery.jvm.resistance.bots.test";
+    public static final String ALL_ENTRANT_PACKAGE = "com.nerdery.jvm.resistance.bots";
 
     public static void main(String[] args) {
-        String entrantPackage = args.length > 0  && "test".equals(args[0]) ? TEST_ENTRANT_PACKAGE : DEFAULT_ENTRANT_PACKAGE;
+        String entrantPackage;
+        if (args.length > 0  && "test".equals(args[0])) {
+            entrantPackage = TEST_ENTRANT_PACKAGE;
+        } else if (args.length > 0 && "all".equals(args[0])) {
+            entrantPackage = ALL_ENTRANT_PACKAGE;
+        } else {
+            entrantPackage = DEFAULT_ENTRANT_PACKAGE;
+        }
         Tournament tournament = Tournament.builder()
                 .entrantPackage(entrantPackage)
                 .build();

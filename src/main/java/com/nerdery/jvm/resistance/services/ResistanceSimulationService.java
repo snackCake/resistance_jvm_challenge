@@ -103,6 +103,7 @@ public class ResistanceSimulationService {
                                     entrantPatientOutcome.getValue().getPatient(),
                                     entrantPatientOutcome.getKey().getDoctorBot(),
                                     entrantPatientOutcome.getValue().getPrescription().isPrescribedAntibiotics(),
+                                    entrantPatientOutcome.getValue().getOutcome(),
                                     entrantPatientOutcome.getValue().getPrescription().getContemplationTime()));
                     return entrantPatientOutcomeMap;
                 })
@@ -168,6 +169,9 @@ public class ResistanceSimulationService {
                     "Patient Temperature",
                     "Patient Bacterial Infection",
                     "Doctor Prescribed Antibiotics",
+                    "Outcome",
+                    "Income",
+                    "Zombies",
                     "Runtime ms");
         } catch (IOException e) {
             logger.error("Failed to write CSV header", e);
@@ -179,6 +183,7 @@ public class ResistanceSimulationService {
                                       Patient patient,
                                       DoctorBot doctor,
                                       boolean antibiotics,
+                                      Outcome outcome,
                                       long runtime) {
         try {
             csvPrinter.printRecord(((Integer)generationNumber).toString(),
@@ -188,6 +193,9 @@ public class ResistanceSimulationService {
                     ((Float)patient.getTemperature()).toString(),
                     ((Boolean)patient.isBacterialInfection()).toString(),
                     ((Boolean)antibiotics).toString(),
+                    outcome.name(),
+                    ((Integer)outcome.getInsurancePayment()).toString(),
+                    ((Boolean)outcome.isZombieApocalypse()).toString(),
                     ((Long)runtime).toString());
         } catch (IOException e) {
             logger.error("Failed to write CSV Record for doctor: " + doctor.getClass().getSimpleName(), e);

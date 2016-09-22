@@ -29,10 +29,13 @@ public class DrSpacemanBot implements DoctorBot {
     @Override
     public boolean prescribeAntibiotic(float patientTemperature, Collection<Prescription> previousPrescriptions) {
         roundNumber++;
+        previousPrescriptions = previousPrescriptions == null ? Collections.emptyList() : previousPrescriptions;
 
         PrescriptionStrategy strategy = new StandardStrategy();
 
-        if (otherDoctors.isEmpty()) {
+        if (previousPrescriptions.isEmpty()) {
+            otherDoctors.clear();
+
             for (Prescription prescription : previousPrescriptions) {
                 String userId = prescription.getUserId();
 
@@ -44,11 +47,13 @@ public class DrSpacemanBot implements DoctorBot {
             }
         } else {
             for (Prescription prescription : previousPrescriptions) {
-                if (USER_ID.equals(prescription.getUserId())) {
+                String userId = prescription.getUserId();
+
+                if (USER_ID.equals(userId)) {
                     continue;
                 }
 
-                otherDoctors.get(prescription.getUserId()).addPrescription(prescription);
+                otherDoctors.get(userId).addPrescription(prescription);
             }
 
             strategy = PrescriptionStrategyFactory.INSTANCE.getStrategy(otherDoctors.values());
@@ -85,17 +90,17 @@ public class DrSpacemanBot implements DoctorBot {
                 aggression += getAggression(doctor);
             }
 
-            float aggressionPercentage = aggression / 4;
+            float averageAggression = aggression / otherDoctors.size();
 
-            if (aggressionPercentage <= 0) {
+            if (averageAggression <= 0) {
                 return new AggressiveStrategy();
-            } else if (aggressionPercentage < .25) {
+            } else if (averageAggression < .25) {
                 return new ProgressivelyAggressiveStrategy();
-            } else if (aggressionPercentage < .5) {
+            } else if (averageAggression < .5) {
                 return new StandardStrategy();
-            } else if (aggressionPercentage < .75) {
+            } else if (averageAggression < .75) {
                 return new DefensiveStrategy();
-            } else if (aggressionPercentage < .99) {
+            } else if (averageAggression < .99) {
                 return new SafeStrategy();
             } else {
                 return new OverprescribeDefenseStrategy();
@@ -155,7 +160,7 @@ public class DrSpacemanBot implements DoctorBot {
                 aggression -= 2;
             }
 
-            return aggression > 0 ? aggression : 0;
+            return aggression > 0 ? aggression / 4 : 0;
         }
     }
 
@@ -186,11 +191,11 @@ public class DrSpacemanBot implements DoctorBot {
             return false;
         }
 
-        protected abstract boolean getLowInfectionChancePrescription();
-
         protected abstract boolean getIndeterminateChancePrescription();
 
         protected abstract boolean getHighInfectionChancePrescription();
+
+        protected abstract boolean getLowInfectionChancePrescription();
 
         boolean getDefiniteInfectionChancePrescription() {
             return true;
