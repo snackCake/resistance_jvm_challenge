@@ -36,7 +36,6 @@ public class TournamentRunner {
             DoctorBot doctorBot = entrant.getDoctorBot();
             System.out.println((i + 1) + ". " + doctorBot.getUserId() + " - " + doctorBot.getClass().getSimpleName() + ": $" + entrant.getScore());
         });
-        tournament.listScoredEntrants()
-                .stream().forEach(entrant -> System.out.println(""));
+        tournament.listScoredEntrants().forEach(entrant -> System.out.println(""));
     }
 }

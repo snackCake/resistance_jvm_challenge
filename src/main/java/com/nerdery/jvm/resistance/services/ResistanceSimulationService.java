@@ -54,15 +54,12 @@ public class ResistanceSimulationService {
         Map<Entrant, EntrantGenerationResult> entrantGenerationResults = new HashMap<>();
         generationPatientOutcomes.get(0)
                 .keySet()
-                .stream()
                 .forEach(entrant -> entrantGenerationResults.put(entrant, new EntrantGenerationResult()));
-        generationPatientOutcomes.stream()
+        generationPatientOutcomes
                 .forEach(dayPatientOutcomes ->
                         dayPatientOutcomes.keySet()
-                                .stream()
                                 .forEach(entrant -> updateGenerationWithDay(entrantGenerationResults, dayPatientOutcomes, entrant)));
         entrantGenerationResults.entrySet()
-                .stream()
                 .forEach(entrantPair -> entrantPair.getKey().addGenerationResult(entrantPair.getValue()));
     }
 
@@ -100,7 +97,7 @@ public class ResistanceSimulationService {
                 .stream()
                 .map(day -> {
                     Map<Entrant, PatientOutcome> entrantPatientOutcomeMap = runAndScoreDay(previousDay, day);
-                    entrantPatientOutcomeMap.entrySet().stream().forEach(entrantPatientOutcome ->
+                    entrantPatientOutcomeMap.entrySet().forEach(entrantPatientOutcome ->
                             logPrescriptionEvent(generation.getGenerationNumber(),
                                     day,
                                     entrantPatientOutcome.getValue().getPatient(),
@@ -113,7 +110,7 @@ public class ResistanceSimulationService {
     }
 
     private void resetEntrants(List<Entrant> entrants) {
-        entrants.stream().forEach(Entrant::resetDoctorBot);
+        entrants.forEach(Entrant::resetDoctorBot);
     }
 
     private Map<Entrant, PatientOutcome> runAndScoreDay(List<PatientOutcome> previousDay, TownDay day) {
